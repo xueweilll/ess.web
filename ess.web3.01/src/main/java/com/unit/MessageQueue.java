@@ -1,0 +1,95 @@
+package com.unit;
+
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.PartSensor;
+
+@Scope("singleton")
+@Service("messageQueue")
+public class MessageQueue {
+	private ConcurrentHashMap<DTU, PartSensor> cacheData;
+	@Autowired
+	private PartsQuence partsQuence;
+	
+	@PostConstruct
+	public void init(){
+		cacheData = new ConcurrentHashMap<>();
+	}
+	
+	public void put(DTU dtu,PartSensor PartSensor){
+		cacheData.put(dtu, PartSensor);
+	}
+	
+	public void remove(DTU dtu){
+		if (cacheData.containsKey(dtu)) {
+			cacheData.remove(dtu);
+		}
+	}
+	
+	public PartSensor get(DTU dtu){
+		return cacheData.get(dtu);
+	}
+	
+	public Map.Entry<DTU,PartSensor> getById(int dtuId){
+		for(Map.Entry<DTU,PartSensor> e:cacheData.entrySet()){
+			DTU dtu = e.getKey();
+			if(dtu.getId()==dtuId){
+				return e;
+			}
+		}
+		return null;
+	}
+
+	public ConcurrentHashMap<DTU, PartSensor> getCacheData() {
+		//遍历站点
+		for(Map.Entry<DTU, PartSensor> e: cacheData.entrySet() ){
+			Set<LMU> set = e.getKey().getLmus();
+			//遍历设备
+			for (LMU lmu : set) {  
+				for(Map.Entry<Integer, Map<String, Object>> e1: partsQuence.getPartsData().entrySet() ){
+					if(lmu.getId() == e1.getKey()){
+						if(lmu.getCode() == 1){
+							e.getValue().setV2(new BigDecimal(e1.getValue().get("wd").toString()));
+							e.getValue().setV3(new BigDecimal(e1.getValue().get("sd").toString()));
+							e.getValue().setWdPlice(Integer.parseInt(e1.getValue().get("wdPolice").toString()));
+							e.getValue().setSdPlice(Integer.parseInt(e1.getValue().get("sdPolice").toString()));
+							e.getValue().setWdStartWarnTime(e1.getValue().get("wdStartWarnTime") != null ? e1.getValue().get("wdStartWarnTime").toString() : "");
+							e.getValue().setSdStartWarnTime(e1.getValue().get("sdStartWarnTime") != null ? e1.getValue().get("sdStartWarnTime").toString() : "");
+						}
+						if(lmu.getCode() == 2){
+							e.getValue().setV1(new BigDecimal(e1.getValue().get("ppm").toString()));
+							e.getValue().setAqPlice(Integer.parseInt(e1.getValue().get("aqPolice").toString()));
+							e.getValue().setAqStartWarnTime(e1.getValue().get("aqStartWarnTime") != null ? e1.getValue().get("aqStartWarnTime").toString() : "");
+						}
+						if(lmu.getCode() == 3){
+							e.getValue().setV4(new BigDecimal(e1.getValue().get("v4").toString()));
+							e.getValue().setV5(new BigDecimal(e1.getValue().get("v5").toString()));
+							e.getValue().setV6(new BigDecimal(e1.getValue().get("v6").toString()));
+							e.getValue().setV7(new BigDecimal(e1.getValue().get("v7").toString()));
+							e.getValue().setV8(new BigDecimal(e1.getValue().get("v8").toString()));
+							e.getValue().setV9(new BigDecimal(e1.getValue().get("v9").toString()));
+							e.getValue().setV10(new BigDecimal(e1.getValue().get("v10").toString()));
+							e.getValue().setV11(new BigDecimal(e1.getValue().get("v11").toString()));
+							
+						}
+					}
+				}
+			}  
+			e.getValue().setAddtime(Calendar.getInstance());
+		}
+		return cacheData;
+	}
+	
+}

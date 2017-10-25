@@ -1,0 +1,34 @@
+/**
+ * lmu model
+ */
+Ext.define('Lmu', {
+	extend : 'Ext.data.Model',
+	fields : [ {
+		name : 'id',
+		type : 'int'
+	}, {
+		name : 'dtuId',
+		type : 'int'
+	}, {
+		name : 'name',
+		type : 'string'
+	}, {
+		name : 'address',
+		type : 'string'
+	}, {
+		name : 'floLimit',
+		type : 'int'
+	}, {
+		name : 'appLimit',
+		type : 'int'
+	}, {
+		name : 'limitNo',
+		type : 'int'
+	},{
+		name : 'code',
+		type : 'int'
+	}, {
+		name : 'dtu',
+		type : 'Dtu'
+	} ]
+})

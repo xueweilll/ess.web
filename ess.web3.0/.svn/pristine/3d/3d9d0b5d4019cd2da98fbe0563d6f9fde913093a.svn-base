@@ -1,0 +1,681 @@
+/**
+ * 
+ */
+var dtustore, lmustore, dtuWindow;
+Ext.onReady(function() {
+
+	   var ds = Ext.create('Ext.data.Store', {  
+           autoLoad :false,  
+           fields : ['lat','lon']
+       });  
+	
+	
+	
+	dtustore = Ext.create('Ext.data.Store', {
+				model : 'Dtu',
+
+				/*
+				 * fields : [{ name : 'code', type : 'string' }, { name :
+				 * 'name', type : 'string' }, { name : 'address', type :
+				 * 'string' }, { name : 'oper', type : 'string' }],
+				 */
+				proxy : {
+					type : 'ajax',
+					method : 'POST',
+					async : true,
+					url : 'createDtus.html',
+
+					extraParams : {
+						pareId : pareId
+					},
+					reader : {
+						type : 'json',
+						root : 'dtuList',
+						successProperty : 'success'
+					}
+				},
+				autoLoad : true,
+				
+			});
+	/*
+	 * dtustore.on('load', function() { dtustore.each(function(record) {
+	 * alert(record.get('code')); }); });
+	 */
+
+	lmustore = Ext.create('Ext.data.Store', {
+				autoDestroy : true,
+				model : 'Lmu',
+				proxy : {
+					type : 'ajax',
+					method : 'POST',
+					url : 'createLmus.html',
+					asyn : true,
+					extraParams : {
+						dtuId : 0
+					},
+					reader : {
+						type : 'json',
+						root : 'arrLmu',
+						successProperty : 'success'
+					}
+				},
+				autoLoad : true
+			});
+	/*
+	 * lmustore.on('load', function() { lmustore.each(function(record) {
+	 * alert(record.get('code')); }); });
+	 */
+
+	Ext.create('Ext.container.Viewport', {
+		title : 'Fit Layout',
+		margin : '0 0 0 0',
+		width : '100%',
+		height : '100%',
+		layout : 'border',
+
+		items : [{
+					title : '区域列表',
+					width : 200,
+					border : false,
+					collapsible : true,
+					split : true,
+					region : 'west',
+					html : "<div id='treeview' style='width:100%;height:100%'></div>"
+				}, {
+					title : '区域信息',
+					border : false,
+					split : true,
+					collapsible : true,
+					width : 300,
+					height : 500,
+					region : 'west',
+					tbar : ['->', {
+								text : '新建',
+								handler : function() {
+									if (pareId == 0) {
+										Ext.Msg.alert('提示', '请先选择站点！');
+									} else {
+										Clear("新建");
+										statusVal = 1;
+										// alert("aa");
+										// pareId = Id;
+										// Id = 0;
+										// CreateDtuWindow();
+										// Ext.getCmp("status").setValue('新建');
+										var pa = {
+											dtuId : 0
+										};
+										Ext.apply(lmustore.proxy.extraParams,
+												pa);
+										lmustore.load();
+										dtuWindow.show();
+									}
+								}
+							}],
+					// html : "<div id='dtuview'
+					// style='width:100%;height:100%'></div>"
+					items : {
+						id : 'dtuGrid',
+						xtype : 'grid',
+						border : false,
+						store : dtustore,
+						columns : [{
+									header : '站点编号',
+									dataIndex : 'code',
+									flex : 2.5
+								}, {
+									header : '站点名称',
+									dataIndex : 'name',
+									flex : 5
+								}, {
+									header : '操作',
+									dataIndex : 'oper',
+									flex : 2.5,
+									renderer : function(val, metadata, record,
+											rowIndex, colIndex, dtustore) {
+										console.log(record.get('dtuX'));
+										//console.log(record);
+										// alert(record.get('code'));
+										/*
+										 * "<a href=\"javascript:void(0)\"
+										 * onclick=\"BindDtu(3,'" +
+										 * record.get('id') + "','" +
+										 * record.get('code') + "','" +
+										 * record.get('name') + "','" +
+										 * record.get('dtuX') + "','" +
+										 * record.get('dtuY') + "','" +
+										 * record.get('IP') + "','" +
+										 * record.get('Port') + "','" +
+										 * record.get('isTogether') + "','" +
+										 * record.get('eqNum') + "','" +
+										 * record.get('address') + "','" +
+										 * record.get('level') + "')\">查看</a>&nbsp;&nbsp;" +
+										 */
+										return "<a href=\"javascript:void(0)\" onclick=\"BindDtu(2,'"
+												+ record.get('id')
+												+ "','"
+												+ record.get('code')
+												+ "','"
+												+ record.get('name')
+												+ "','"
+												+ record.get('dtuX')
+												+ "','"
+												+ record.get('dtuY')
+												+ "','"
+												+ record.get('IP')
+												+ "','"
+												+ record.get('port')
+												+ "','"
+												/*+ record.get('isTogether')
+												+ "','"
+												+ record.get('eqNum')
+												+ "','"*/
+												+ record.get('address')
+												+ "','"
+												+ record.get('level')
+												+ "','"
+												+ record.get('phone')
+												+ "','"
+												+ record.get('nvrUsername')
+												+ "','"
+												+ record.get('nvrPassword')
+												+ "','"
+												+ record.get('nvrPort')
+												+ "','"
+												+ record.get('nvrIp')
+												+ "','"
+												+ record.get('nvrPath')
+												+ "','"
+												+ record.get('nvrPhonePort')
+												+ "','"
+												+ record.get('nvrPhonePath')
+												+ "')\">编辑</a>&nbsp;&nbsp;"
+												+ "<a href=\"javascript:void(0)\" onclick=\"Delete("
+												+ record.get('id')
+												+ ")\">删除</a>";
+									}
+								}],
+								listeners : {
+									itemclick : function(view, record, item, index, e, eOpts) {
+										
+									}
+								}
+					}
+				}, {
+					// xtype : 'Ext.panel.Panel',
+					id:'aa',
+					title : '猪舍',
+					border : false,
+					region : 'center',
+					width: '100%',
+					height: '100%',
+					//bodyStyle : 'width:100%;height:100%;background:url(image/dap.jpg) no-repeat 0 0;background-size:100% 100%;position:relative;',
+					//html:'<div id="bb" onclick="vControl(event,this)" style="width:100%;height:100%;background:url(image/dapmap.png) no-repeat 0 0;background-size:100% 100%;position:relative;"></div>',
+					html:'<div id="bb" onclick="vControl(event,this)" style="width:100%;height:100%;background:url(image/dapmap.png) no-repeat 0 0;background-size:100% 100%;position:relative;"></div>',
+					      
+						
+				}],
+		renderTo : Ext.getBody()
+	});
+
+	CreateTree();
+
+	//CreateMap();
+
+	CreateDtuWindow();
+});
+
+function CreateDtuWindow() {
+	dtuWindow = Ext.create('Ext.window.Window', {
+				title : '站点编辑',
+				closeAction : 'hide',
+				width : 650,
+				height : 600,
+				overflow : true,
+				layout : 'fit',
+				resizable : false,
+				// modal : true,
+				items : {
+					id : 'dtuForm',
+					xtype : 'form',
+					border : false,
+					layout : {
+						type : 'table',
+						columns : 3
+					},
+					// defaultType : 'textfield',
+					buttonAlign : 'center',
+					items : [{
+								xtype : 'textfield',
+								id : 'status',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '当前状态',
+								readOnly:true
+							}, {
+								xtype : 'textfield',
+								id : 'stationName',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '区域名称',
+								allowBlank : false,
+								blankText : '区域名称不能为空',
+								readOnly:true
+							}, {
+								xtype : 'textfield',
+								id : 'code',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点编号',
+								allowBlank : false,
+								blankText : '站点编号不能为空',
+								regex : /^[0-9]*$/,
+								regexText : '输入必须为正整数'
+							}, {
+								xtype : 'textfield',
+								id : 'name',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点名称',
+								allowBlank : false,
+								blankText : '站点名称不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'IP',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点IP'
+							}, {
+								xtype : 'textfield',
+								id : 'Port',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点Port'
+							},/* {
+								xtype : 'textfield',
+								id : 'phone',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'SIM卡号'
+							}*/,{
+								xtype : 'textfield',
+								id : 'dtuX',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点坐标X'
+							}, {
+								xtype : 'textfield',
+								id : 'dtuY',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点坐标Y'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrUsername',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'nvr账号',
+								allowBlank : false,
+								blankText : 'nvr账号不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrPassword',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'nvr密码',
+								allowBlank : false,
+								blankText : 'nvr密码不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrIp',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'nvrIp',
+								allowBlank : false,
+								blankText : 'nvrIp不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrPath',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'nvr通道',
+								allowBlank : false,
+								blankText : 'nvrPath不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrPort',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : 'nvr端口',
+								allowBlank : false,
+								blankText : 'nvrPort不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrPhonePort',
+								margin : '10 20 0 20',
+								labelWidth : 80,
+								fieldLabel : 'Phone端口',
+								allowBlank : false,
+								blankText : 'NvrPhonePort不能为空'
+							}, {
+								xtype : 'textfield',
+								id : 'nvrPhonePath',
+								margin : '10 20 0 20',
+								labelWidth : 80,
+								fieldLabel : 'Phone通道',
+								allowBlank : false,
+								blankText : 'NvrPhonePath不能为空'
+							}
+							/*, {
+								xtype : 'checkboxfield',
+								id : 'isTogether',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '通讯处理'
+							}, {
+								xtype : 'combobox',
+								id : 'eqNum',
+								width : 155,
+								store : eqNums,
+								queryMode : 'local',
+								valueField : 'val',
+								displayField : 'name',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '其他设备',
+								colspan : 2
+							}*/, {
+								xtype : 'textfield',
+								width : 600,
+								height : 50,
+								id : 'address',
+								margin : '20 20 0 20',
+								labelWidth : 60,
+								fieldLabel : '站点描述',
+								colspan : 3
+							}, {
+								xtype : 'cellediting',
+								id : 'lmugrid',
+								margin : '20 20 20 20',
+								width : 600,
+								height : 150,
+								colspan : 3
+							}],
+					// html:"<div id='lmugrid'>aa</div>",
+					buttons : [{
+								xtype : 'button',
+								text : '保存',
+								width : 40,
+								margin : '10,0,10,0',
+								handler : function() {
+									Edit();
+								}
+							}, {
+								xtype : 'button',
+								text : '取消',
+								width : 40,
+								margin : '10,0,10,20',
+								handler : function() {
+									dtuWindow.hide();
+								}
+							}]
+				}
+			});
+//	Ext.getCmp('eqNum').setValue("0");
+}
+
+function Delete(dtuId) {
+	Ext.MessageBox.confirm('提示', '是否确定删除？', callback);
+	function callback(id) {
+		if (id == "yes") {
+			Clear('查看');
+			statusVal = 0;
+			Ext.Ajax.request({
+				url : 'dtuEdit.html',
+				params : {
+					status : statusVal,
+					dtuId : dtuId
+				},
+				method : 'POST',
+				success : function(response) {
+					var text = response.responseText;
+					if (Ext.decode(text).result) {
+						Ext.apply(dtustore.proxy.extraParams, {pareId:pareId});
+						dtustore.load();
+						var pa = {
+							dtuId : dtuId
+						};
+						Ext.apply(lmustore.proxy.extraParams, pa);
+						lmustore.load();
+					} else {
+						Ext.Msg
+								.alert("结果提示",
+										"<font style='color:red;text-align:center'>操作失败!</font>");
+					}
+				}
+			});
+		}
+	}
+}
+
+function Edit() {
+	if (!Ext.getCmp('dtuForm').isValid()) {
+		return false;
+	}
+	if (pareId == 0) {
+		Ext.Msg.alert('提示', '请先选择站点！');
+		return false;
+	}
+	var dtu = Ext.create('Dtu', {
+				id : Id,
+				code : Ext.getCmp('code').getValue(),
+				name : Ext.getCmp('name').getValue(),
+				address : Ext.getCmp('address').getValue(),
+				IP : Ext.getCmp('IP').getValue(),
+				dtuX : Ext.getCmp('dtuX').getValue(),
+				dtuY : Ext.getCmp('dtuY').getValue(),
+				stationId : pareId,
+				/*level : currentLevel,*/
+				port : Ext.getCmp('Port').getValue(),
+				//isTogether : Ext.getCmp('isTogether').getValue(),
+				//eqNum : Ext.getCmp('eqNum').getValue(),
+				//phone:Ext.getCmp('phone').getValue(),
+				nvrUsername:Ext.getCmp('nvrUsername').getValue(),
+				nvrPassword:Ext.getCmp('nvrPassword').getValue(),
+				nvrPort:Ext.getCmp('nvrPort').getValue(),
+				nvrIp:Ext.getCmp('nvrIp').getValue(),
+				nvrPath:Ext.getCmp('nvrPath').getValue(),
+				nvrPhonePort:Ext.getCmp('nvrPhonePort').getValue(),
+				nvrPhonePath:Ext.getCmp('nvrPhonePath').getValue()
+			});
+	var arr = new Array();
+	var flag = false;
+	var codeFlag = false;
+	lmustore.each(function(record) {
+		//alert(record.data.id);
+		for (var i = 0; i < arr.length; i++) {
+			if(arr[i].type == record.data.type){
+				flag = true;
+			}
+			
+			if(arr[i].code == record.data.code){
+				codeFlag = true;
+			}
+			
+		}
+			arr.push(record.data);
+			// console.log(Ext.encode(record.data));
+			// alert(Ext.encode(record.data));
+		});
+	// alert(statusVal);
+		if(flag){
+			Ext.Msg.alert('提示', '同一类型设备只能添加一个！');
+			return false;
+		}
+		if(codeFlag){
+			Ext.Msg.alert('提示', '设备编号不能重复！');
+			return false;
+		}
+		
+		
+		
+		
+	Ext.Ajax.request({
+		url : 'dtuEdit.html',
+		params : {
+			status : statusVal,
+			dtu : Ext.encode(dtu.data),
+			listLmu : Ext.encode(arr)
+		},
+		method : 'POST',
+		success : function(response) {
+			var text = response.responseText;
+			// alert(Ext.decode(text).result);
+			if (Ext.decode(text).result) {
+				//dtustore.loadData([],false);
+				var pa = {
+						pareId : pareId
+					}
+					Ext.apply(dtustore.proxy.extraParams, pa);
+					dtustore.load();
+				dtuWindow.hide();
+			} else {
+				Ext.Msg.alert("结果提示","<font style='color:red;text-align:center'>操作失败!</font>");
+			}
+		}
+	});
+}
+var store;
+function CreateTree() {
+	Ext.define('Marker', {
+				extend : 'Ext.data.Model',
+				fields : [{
+							name : 'id',
+							type : 'string'
+						}, {
+							name : 'text',
+							type : 'string'
+						}, {
+							name : 'objData',
+							type : 'Station'
+						}]
+			});
+	store = Ext.create('Ext.data.TreeStore', {
+				id : 'store',
+				model : 'Marker',
+				proxy : {
+					type : 'ajax',
+					url : 'stationTree.html'
+				},
+				reader : {
+					type : 'json',
+					root : 'children',
+					successProperty : 'success'
+				},
+				clearOnLoad : true,
+				root : {
+					id : '0',
+					text : '所有区域',
+					expanded : true
+				},
+				autoLoad : false
+
+			});
+	Ext.create('Ext.tree.Panel', {
+				renderTo : 'treeview',
+				border : false,
+				width : '100%',
+				height : '100%',
+				store : store,
+				rootVisible : false,
+				listeners : {
+					itemclick : function(view, record, item, index, e, eOpts) {
+						// alert(record.get('objData').pareid);
+						// Id = record.get('objData').id;
+						// pareId = record.get('objData').pareid;
+							stationName = record.get('objData').stationname;
+							// alert(stationName)
+							pareId = record.get('objData').id;
+							var pa = {
+								pareId : pareId
+							}
+							Ext.apply(dtustore.proxy.extraParams, pa);
+							dtustore.load();
+					}
+				}
+			})
+}
+
+var Id = 0, stationName, pareId = 0, statusVal = -1;
+var eqNums = Ext.create('Ext.data.Store', {
+			fields : ['val', 'name'],
+			data : [{
+						"val" : "0",
+						"name" : "请选择..."
+					}, {
+						"val" : "1",
+						"name" : "1"
+					}, {
+						"val" : "2",
+						"name" : "2"
+					}]
+		});
+function Clear(status) {
+	Ext.getCmp('status').setValue(status);
+	Ext.getCmp('stationName').setValue(stationName);
+	Ext.getCmp('code').setValue("");
+	Ext.getCmp('name').setValue("");
+	Ext.getCmp('dtuX').setValue("");
+	Ext.getCmp('dtuY').setValue("");
+	Ext.getCmp('IP').setValue("");
+	Ext.getCmp('Port').setValue("");
+	//Ext.getCmp('isTogether').setValue(false);
+	//Ext.getCmp('eqNum').setValue("0");
+	//Ext.getCmp('phone').setValue("");
+	Ext.getCmp('nvrUsername').setValue("");
+	Ext.getCmp('nvrPassword').setValue("");
+	Ext.getCmp('nvrPort').setValue("");
+	Ext.getCmp('nvrIp').setValue("");
+	Ext.getCmp('nvrPath').setValue("");
+	Ext.getCmp('nvrPhonePort').setValue("");
+	Ext.getCmp('nvrPhonePath').setValue("");
+}
+
+function BindDtu(stv, id, code, name, dtux, dtuy, ip, port,
+		address, level,phone,nvrUsername,nvrPassword,nvrPort,nvrIp,nvrPath,nvrPhonePort,nvrPhonePath) {
+	position(dtux,dtuy);
+	var pa = {
+		dtuId : id
+	};
+	Ext.apply(lmustore.proxy.extraParams, pa);
+	lmustore.load();
+	dtuWindow.show();
+	// alert(port);
+	statusVal = stv;
+	var status;
+	if (stv == 2) {
+		status = "编辑";
+	} else {
+		status = "查看";
+	}
+	Id = id;
+	Ext.getCmp('status').setValue(status);
+	Ext.getCmp('stationName').setValue(stationName);
+	Ext.getCmp('code').setValue(code);
+	Ext.getCmp('name').setValue(name);
+	Ext.getCmp('dtuX').setValue(dtux);
+	Ext.getCmp('dtuY').setValue(dtuy);
+	Ext.getCmp('IP').setValue(ip);
+	Ext.getCmp('Port').setValue(port);
+	//Ext.getCmp('isTogether').setValue(istogether);
+	//Ext.getCmp('eqNum').setValue(eqnum);
+	Ext.getCmp('address').setValue(address);
+	//Ext.getCmp('phone').setValue(phone);
+	Ext.getCmp('nvrUsername').setValue(nvrUsername);
+	Ext.getCmp('nvrPassword').setValue(nvrPassword);
+	Ext.getCmp('nvrPort').setValue(nvrPort);
+	Ext.getCmp('nvrIp').setValue(nvrIp);
+	Ext.getCmp('nvrPath').setValue(nvrPath);
+	Ext.getCmp('nvrPhonePort').setValue(nvrPhonePort);
+	Ext.getCmp('nvrPhonePath').setValue(nvrPhonePath);
+}

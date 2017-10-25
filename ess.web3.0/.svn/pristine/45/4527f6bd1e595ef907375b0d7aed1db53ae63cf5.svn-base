@@ -1,0 +1,329 @@
+package com.action.station;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.struts2.ServletActionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.action.ActionBase;
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.PartSensor;
+import com.hibernate.entity.Station;
+import com.service.AlarmMsgService;
+import com.service.DtuService;
+import com.service.LmuService;
+import com.service.StationService;
+import com.unit.MessageQueue;
+
+public class LimitAtation extends ActionBase{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@Autowired
+	MessageQueue messageQueue;
+	@Autowired
+	StationService stationService;
+	@Autowired
+	DtuService dtuService;
+	@Autowired
+	LmuService lmuService;
+	@Autowired
+	private AlarmMsgService alarmMsgService;
+	private List<Map<String, Object>> selectList;
+	private List<Object> list1;
+	
+
+
+	
+	public String GetNvrList(){
+		List<Station> list = stationService.stationlist();
+		List<DTU> list2 = dtuService.DTUlist();
+		nvrList  = new ArrayList<Map<String, Object>>();
+		for (Station station : list) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("areaName", station.getStationname());
+			List<Map<String, Object>> dtuList = new ArrayList<Map<String, Object>>();
+			for (DTU dtu : list2) {
+				if(station.getId() == dtu.getStationId()){
+					Map<String, Object> map1 = new HashMap<String,Object>();
+					map1.put("siteName", dtu.getName());
+					map1.put("videoUser", dtu.getNvrUsername());
+					map1.put("videoIP", dtu.getNvrIp());
+					map1.put("videoPassWord", dtu.getNvrPassword());
+					map1.put("videoPort", dtu.getNvrPhonePort());
+					map1.put("videoChannelNumber", dtu.getNvrPhonePath());
+					map1.put("id", dtu.getId());
+					dtuList.add(map1);
+					break;
+				}
+			}
+			if(dtuList.size() > 0){
+				map.put("siteVideos", dtuList);
+				nvrList.add(map);
+			}
+		}
+		return "success";
+	}
+	
+	private PartSensor partSensor;
+	
+	
+	
+	public String GetNvrMsg(){
+		 String id = ServletActionContext.getRequest().getParameter("id") != null ? ServletActionContext.getRequest().getParameter("id") : "0";
+		ConcurrentHashMap<DTU, PartSensor> cacheData = messageQueue.getCacheData();
+		int dtu_id=dtuService.findIndexCode(id);
+		/**
+		 * dtu_id=-1无该设备
+		 */
+		if(dtu_id==-1){
+		 return "false";	
+		}else{
+		for (Map.Entry<DTU, PartSensor> e : cacheData.entrySet()) {
+			/*if(e.getKey().getId() == Integer.parseInt(id)){
+				partSensor = e.getValue();
+			}*/
+			if(e.getKey().getId() == dtu_id){
+				partSensor = e.getValue();
+			}
+		}
+		return "success";
+		}
+	}
+	
+	
+
+	public String limitAtation() throws IOException{
+		selectList = new ArrayList<Map<String, Object>>();
+		ConcurrentHashMap<DTU, PartSensor> cacheData = messageQueue.getCacheData();
+		List<Station> stationList = stationService.stationlist();
+		for (Station station : stationList) {
+			Map<String, Object> map = null;
+			map=new HashMap<String,Object>();
+			map.put("areaName", station.getStationname());
+			int sb = 0;
+			int police = 0;
+			List<Map<String, Object>> listsx = new ArrayList<Map<String,Object>>();
+			for (Map.Entry<DTU, PartSensor> e : cacheData.entrySet()) {
+				station.getId();
+				e.getKey().getStationId();
+
+				if(station.getId() == e.getKey().getStationId()){
+					Map<String, Object> mapsx = null;
+					Object[] obj = new Object[11];
+					obj[0] = e.getValue().getV1();
+					obj[1] = e.getValue().getV2();
+					obj[2] = e.getValue().getV3();
+					obj[3] = e.getValue().getV4();
+					obj[4] = e.getValue().getV5();
+					obj[5] = e.getValue().getV6();
+					obj[6] = e.getValue().getV7();
+					obj[7] = e.getValue().getV8();
+					obj[8] = e.getValue().getV9();
+					obj[9] = e.getValue().getV10();
+					obj[10] = e.getValue().getV11();
+					for (int i = 0; i < obj.length; i++) {
+						mapsx = new HashMap<>();
+						mapsx.put("status", "");
+						//氨气
+						if(i == 0){
+							if(obj[i] != null){
+								//区域名称
+								mapsx.put("areaName", station.getStationname());
+								mapsx.put("dataValue", obj[i]);
+								mapsx.put("facilityType", 1);
+								mapsx.put("isWarn", e.getValue().getV1Police());
+								sb ++;
+								if(e.getValue().getV1Police() == 1){
+									mapsx.put("status", alarmMsgService.getByid(e.getValue().getV1AlarmId()).getStatus());
+									if(alarmMsgService.getByid(e.getValue().getV1AlarmId()).getStatus() == 0){
+										police ++;
+									}
+								}
+								mapsx.put("siteName", e.getKey().getName());
+								listsx.add(mapsx);
+							}
+						}
+						//温度
+						if(i == 1){  
+							if(obj[i] != null){
+								//区域名称
+								mapsx.put("areaName", station.getStationname());
+								mapsx.put("dataValue", obj[i]);
+								mapsx.put("facilityType", 2);
+								mapsx.put("isWarn", e.getValue().getV2Police());
+								sb ++;
+								if(e.getValue().getV2Police() == 1){
+									mapsx.put("status", alarmMsgService.getByid(e.getValue().getV2AlarmId()).getStatus());
+									if(alarmMsgService.getByid(e.getValue().getV2AlarmId()).getStatus() == 0){
+										police ++;
+									}
+								}
+								mapsx.put("siteName", e.getKey().getName());  
+								listsx.add(mapsx);
+							}
+						}
+						//湿度
+						if(i == 2){
+							if(obj[i] != null){
+								//区域名称
+								mapsx.put("areaName", station.getStationname());
+								mapsx.put("dataValue", obj[i]);
+								mapsx.put("facilityType", 3);
+								mapsx.put("isWarn", e.getValue().getV3Police());
+								sb ++;
+								if(e.getValue().getV3Police()== 1){
+									mapsx.put("status", alarmMsgService.getByid(e.getValue().getV3AlarmId()).getStatus());
+									if(alarmMsgService.getByid(e.getValue().getV3AlarmId()).getStatus() == 0){
+										police ++;
+									}
+								}
+								mapsx.put("siteName", e.getKey().getName());
+								listsx.add(mapsx);
+							}
+						}
+						//市电
+						if(i > 2){
+							if(obj[i] != null){
+								//区域名称
+								mapsx.put("areaName", station.getStationname());
+								mapsx.put("dataValue", obj[i]);
+								mapsx.put("facilityType", i+1);
+								if(i==3){
+								    mapsx.put("isWarn", e.getValue().getV4Police());
+								    if(e.getValue().getV4Police() == 1){
+								    	mapsx.put("status", alarmMsgService.getByid(e.getValue().getV4AlarmId()).getStatus());
+										if(alarmMsgService.getByid(e.getValue().getV4AlarmId()).getStatus() == 0){
+											police ++;
+										}
+									}
+								}	   
+								else if(i==4){
+									mapsx.put("isWarn", e.getValue().getV5Police());
+									 if(e.getValue().getV5Police() == 1){
+											mapsx.put("status", alarmMsgService.getByid(e.getValue().getV5AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV5AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==5){
+									mapsx.put("isWarn", e.getValue().getV6Police());
+									 if(e.getValue().getV6Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV6AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV6AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==6){
+									mapsx.put("isWarn", e.getValue().getV7Police());
+									 if(e.getValue().getV7Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV7AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV7AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==7){
+									mapsx.put("isWarn", e.getValue().getV8Police());
+									 if(e.getValue().getV8Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV8AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV8AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==8){
+									mapsx.put("isWarn", e.getValue().getV9Police());
+									 if(e.getValue().getV9Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV9AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV9AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==9){
+									mapsx.put("isWarn", e.getValue().getV10Police());
+									 if(e.getValue().getV10Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV10AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV10AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+								else if(i==10){
+									mapsx.put("isWarn", e.getValue().getV11Police());
+									 if(e.getValue().getV11Police() == 1){
+										 mapsx.put("status", alarmMsgService.getByid(e.getValue().getV11AlarmId()).getStatus());
+											if(alarmMsgService.getByid(e.getValue().getV11AlarmId()).getStatus() == 0){
+												police ++;
+											}
+										}
+									}
+									sb ++;
+								mapsx.put("siteName", e.getKey().getName());
+								listsx.add(mapsx);
+							}
+						}
+					}
+					map.put("facilityDetails", listsx);
+					map.put("facilitySum", sb);
+					map.put("facilityWarnNumber", police);
+				}
+			}
+			selectList.add(map);
+		}
+		return 	"success";
+	}
+
+	
+
+	public List<Map<String, Object>> getSelectList() {
+		return selectList;
+	}
+
+
+
+	public void setSelectList(List<Map<String, Object>> selectList) {
+		this.selectList = selectList;
+	}
+
+
+
+	public List<Map<String, Object>> getNvrList() {
+		return nvrList;
+	}
+
+
+
+	public void setNvrList(List<Map<String, Object>> nvrList) {
+		this.nvrList = nvrList;
+	}
+
+
+
+	public PartSensor getPartSensor() {
+		return partSensor;
+	}
+
+
+
+	public void setPartSensor(PartSensor partSensor) {
+		this.partSensor = partSensor;
+	}
+	private List<Map<String, Object>> nvrList;
+	public List<Object> getList1() {
+		return list1;
+	}
+	public void setList1(List<Object> list1) {
+		this.list1 = list1;
+	}
+
+}

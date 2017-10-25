@@ -1,0 +1,92 @@
+<%@ page language="java" import="java.util.*" pageEncoding="ISO-8859-1"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<base href="<%=basePath%>">
+
+<title></title>
+
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="This is my page">
+
+<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+</head>
+
+<body>
+	<div id="divPlugin" class="plugin"></div>
+	<script type="text/javascript">
+	 // 初始化插件
+	 var id="";
+	 // 全局保存当前选中窗口
+	 var g_iWndIndex = 0; //可以不用设置这个变量，有窗口参数的接口中，不用传值，开发包会默认使用当前选择窗口
+	 $(function () {
+		 if (-1 == WebVideoCtrl
+					.I_CheckPluginInstall()) {
+				$.messager.confirm('确认对话框', '您还未安装过插件,请点击确定下载！', function(r){
+					if (r){
+					    window.open("js/video/WebComponents.exe");
+					}
+				});
+				
+				return;
+			}
+
+			// 初始化插件参数及插入插件
+			WebVideoCtrl.I_InitPlugin(585, 330, {
+				iWndowType : 1,
+				cbSelWnd : function(xmlDoc) {
+					g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0)
+							.text();
+				}
+			});
+			WebVideoCtrl
+					.I_InsertOBJECTPlugin("divPlugin");
+			WebVideoCtrl.I_ChangeWndNum(3);
+			
+			
+		
+		 
+	 });
+	 
+	// 开始预览
+	 function clickStartRealPlay() {
+	 	var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+	 		szIP = $("#ip").val(),
+	 		iStreamType = 1,
+	 		iChannelID =1,
+	 		bZeroChannel = $("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
+	 		szInfo = "";
+
+	 	if ("" == szIP) {
+	 		return;
+	 	}
+
+	 	if (oWndInfo != null) {// 已经在播放了，先停止
+	 		WebVideoCtrl.I_Stop();
+	 	}
+
+	 	var iRet = WebVideoCtrl.I_StartRealPlay(szIP, {
+	 		iStreamType: iStreamType,
+	 		iChannelID: iChannelID,
+	 		bZeroChannel: bZeroChannel
+	 	});
+
+	 	if (0 == iRet) {
+	 		szInfo = "开始预览成功！";
+	 	} else {
+	 		szInfo = "开始预览失败！";
+	 	}
+
+	 	showOPInfo(szIP + " " + szInfo);
+	 }
+   	</script>
+</body>
+</html>

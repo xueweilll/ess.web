@@ -1,0 +1,52 @@
+package com.unit;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.Sensor;
+
+@Scope("singleton")
+@Service("messageQueue")
+public class MessageQueue {
+	private ConcurrentHashMap<DTU, Sensor> cacheData;
+	
+	@PostConstruct
+	public void init(){
+		cacheData = new ConcurrentHashMap<>();
+	}
+	
+	public void put(DTU dtu,com.hibernate.entity.Sensor sensor){
+		cacheData.put(dtu, sensor);
+	}
+	
+	public void remove(DTU dtu){
+		if (cacheData.containsKey(dtu)) {
+			cacheData.remove(dtu);
+		}
+	}
+	
+	public Sensor get(DTU dtu){
+		return cacheData.get(dtu);
+	}
+	
+	public Map.Entry<DTU,Sensor> getById(int dtuId){
+		for(Map.Entry<DTU,Sensor> e:cacheData.entrySet()){
+			DTU dtu = e.getKey();
+			if(dtu.getId()==dtuId){
+				return e;
+			}
+		}
+		return null;
+	}
+
+	public ConcurrentHashMap<DTU, Sensor> getCacheData() {
+		return cacheData;
+	}
+	
+}

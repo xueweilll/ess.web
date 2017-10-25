@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="dialect">
+          org.hibernate.dialect.MySQLDialect
+        </property>
+		<property name="show_sql">true</property>
+		<property name="format_sql">true</property>
+		<property name="hbm2ddl.auto">update</property>
+		<property name="hibernate.autoReconnect">true</property>
+		<property name="connection.autoReconnectForPools">true</property> 
+        <property name="connection.is-connection-validation-required">true</property>
+		<mapping resource="com/hibernate/entity/User.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Menu.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Station.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/DTU.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/LMU.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/HisIrData.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/HisHrData.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Sensor.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/CurrentIrData.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Msg.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Params.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Lglink.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/LmuGroup.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/AlarmMsg.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Role.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Rulink.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Rmlink.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/SysLog.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/LogType.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Alarm.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/AlarmDetials.hbm.xml"/>
+		<mapping resource="com/hibernate/entity/Model.hbm.xml"/>
+	</session-factory>
+</hibernate-configuration>

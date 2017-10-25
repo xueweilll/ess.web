@@ -1,0 +1,235 @@
+package com.protocol;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.mina.core.session.IoSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hibernate.entity.AlarmMsg;
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.PartSensor;
+import com.hibernate.entity.Sensor;
+import com.service.AlarmMsgService;
+import com.service.SensorService;
+import com.unit.LmuMsgQuence;
+import com.unit.MessageQueue;
+import com.unit.PartsQuence;
+@Service("wSProtocol")
+public class WSProtocol implements YZCProtocol{
+	@Autowired
+	private PartsQuence partsQuence;
+	@Autowired
+	private SensorService sensorService;
+	@Autowired
+	private LmuMsgQuence lmuMsgQuence;
+	@Autowired
+	private AlarmMsgService alarmMsgService;
+	@Autowired
+	private MessageQueue messageQueue;
+	@Override
+	public byte[] readCmd(int code) {
+		byte[] cmd = new byte[8];
+		cmd[0] = (byte) code;
+		cmd[1] = 0x03;
+		cmd[2] = 0x00;
+		cmd[3] = 0x00;
+		cmd[4] = 0x00;
+		cmd[5] = 0x02;
+		CRC crc = new CRC();
+		crc.CrcMake(6, cmd);
+		cmd[6] = crc.getBYCRCHi();
+		cmd[7] = crc.getBYCRCLo();
+		return cmd;
+	}
+
+	@Override
+	public void anlysis(byte[] data,IoSession session) {
+		CRC crc = new CRC();
+		if(crc.crc_check(7, data) != 0){
+			try {
+				Map<String, Object> map = new HashMap<String, Object>();
+				int wd = 0;
+				int sd = 0;
+				//data[3],data[4];
+				wd = Convert.ArrByteToInt(data,3,2);
+				sd = Convert.ArrByteToInt(data,5,2);
+				int dtuId = (int) session.getAttribute("dtuId");
+				DTU dtu = null;
+				for(Map.Entry<DTU, PartSensor> e: messageQueue.getCacheData().entrySet() ){
+					if(e.getKey().getId() == dtuId){
+						dtu = e.getKey();
+					}
+				}
+				if(dtu == null){
+					return;
+				}
+				Sensor sensor = new Sensor();
+				sensor.setId(UUID.randomUUID().toString());
+				sensor.setDtuId(String.valueOf(dtu.getId()));
+				for (LMU lmu : dtu.getLmus()) {
+					if (lmu.getCode() == data[0]) {
+						sensor.setLmu(lmu);
+						break;
+					}
+				}
+				sensor.setDtuName(dtu.getName());
+				//温度
+				sensor.setV2(new BigDecimal(String.valueOf(wd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP));
+				map.put("v2", String.valueOf(new BigDecimal(String.valueOf(wd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP)));
+				//湿度
+				sensor.setV3(new BigDecimal(String.valueOf(sd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP));
+				map.put("v3", String.valueOf(new BigDecimal(String.valueOf(sd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP)));
+				sensor.setAddtime(Calendar.getInstance());
+				try {
+					sensorService.insert(sensor);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				//是否温度报警
+				map.put("v2Police", 0);
+				//温度报警次数
+				map.put("v2Time", 0);
+				//温度报警时间
+				map.put("v2StartWarnTime","");
+				
+				//是否湿度报警
+				map.put("v3Police", 0);
+				//湿度报警次数
+				map.put("v3Time", 0);
+				//湿度报警时间
+				map.put("v3StartWarnTime","");
+				
+				
+				
+				//判断氨气上下限是否存在，2为温度下限，3，为湿度上下限 ，根据表lmulimit的type字段来定义，和lmu表的code无关
+				if(lmuMsgQuence.get(sensor.getLmu().getId()) != null && !lmuMsgQuence.get(sensor.getLmu().getId()).get("type").toString().equals("0")){
+					Map<String, Object> mapLimit = lmuMsgQuence.get(sensor.getLmu().getId());
+					//默认温度上限为30
+					BigDecimal v2up = mapLimit.get("w1") != null ? new BigDecimal(mapLimit.get("w1").toString()) : new BigDecimal(30);
+					//默认温度下限为0
+					BigDecimal v2down = mapLimit.get("w2") != null ? new BigDecimal(mapLimit.get("w2").toString()) : new BigDecimal(0);
+					//默认报警频率为1
+					int v2rate = mapLimit.get("wrate") != null ? Integer.parseInt(mapLimit.get("wrate").toString()) : 10;
+					//系统启动第一次
+					int v2low = sensor.getV2().compareTo(v2down);
+					int v2high =  sensor.getV2().compareTo(v2up);
+					
+					//默认湿度上限为80
+					BigDecimal v3up = mapLimit.get("s1") != null ? new BigDecimal(mapLimit.get("s1").toString()) : new BigDecimal(80);
+					//默认湿度下限为30
+					BigDecimal v3down = mapLimit.get("s2") != null ? new BigDecimal(mapLimit.get("s2").toString()) : new BigDecimal(30);
+					//默认报警频率为1
+					int v3rate = mapLimit.get("srate") != null ? Integer.parseInt(mapLimit.get("srate").toString()) : 10;
+					
+					//系统启动第一次
+					int v3low = sensor.getV3().compareTo(v3down);
+					int v3high =  sensor.getV3().compareTo(v3up);
+					
+					if(partsQuence.get(sensor.getLmu().getId()) == null){
+						if(v2low == -1 || v2high == 1){
+							//第一次报警次数
+							map.put("v2Time", 1);
+						}
+						if(v3low == -1 || v3high == 1){
+							//第一次报警次数
+							map.put("v3Time", 1);
+						}
+					}else{
+						int v2Time = Integer.parseInt(partsQuence.get(sensor.getLmu().getId()).get("v2Time").toString());
+						
+						int v3Time = Integer.parseInt(partsQuence.get(sensor.getLmu().getId()).get("v3Time").toString());
+						
+						if(v2low == -1 || v2high == 1){
+							v2Time ++;
+							if(v2Time > v2rate){
+								map.put("v2Police", 1);
+								map.put("v2StartWarnTime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()));
+								if(v2Time - v2rate == 1){
+									/*Object[] obj = new Object[]{2,sensor.getLmu().getId(),sensor.getDtuId()};
+									List<AlarmMsg> list = alarmMsgService.getAlarmMsg(hql, obj);
+									if(list.size() == 0){
+										
+									}*/
+									AlarmMsg alarmMsg = new AlarmMsg();
+									alarmMsg.setAddtime(Calendar.getInstance());
+									alarmMsg.setDtuId(sensor.getDtuId());
+									alarmMsg.setLmuId(sensor.getLmu().getId());
+									alarmMsg.setType(2);
+									alarmMsg.setInfomation("当前温度为："+sensor.getV2()+"°C");
+									if(v2low == -1){
+										alarmMsg.setConfirm(0);
+									}else{
+										alarmMsg.setConfirm(1);
+									}
+									alarmMsgService.saveAlarmMsg(alarmMsg);
+									map.put("v2AlarmMsg", alarmMsg.getId());
+								}else{
+									map.put("v2AlarmMsg",  partsQuence.get(sensor.getLmu().getId()).get("v2AlarmMsg"));
+								}
+							}
+							map.put("v2Time", v2Time);
+						}else{
+							map.put("v2AlarmMsg",0);
+						}
+						if(v3low == -1 || v3high == 1){
+							v3Time ++;
+							if(v3Time > v3rate){
+								map.put("v3Police", 1);
+								map.put("v3StartWarnTime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()));
+								if(v3Time - v3rate == 1){
+									/*Object[] obj = new Object[]{3,sensor.getLmu().getId(),sensor.getDtuId()};
+									List<AlarmMsg> list = alarmMsgService.getAlarmMsg(hql, obj);
+									if(list.size() == 0){
+										
+									}*/
+									AlarmMsg alarmMsg = new AlarmMsg();
+									alarmMsg.setAddtime(Calendar.getInstance());
+									alarmMsg.setDtuId(sensor.getDtuId());
+									alarmMsg.setLmuId(sensor.getLmu().getId());
+									alarmMsg.setType(3);
+									alarmMsg.setInfomation("当前湿度度为："+sensor.getV3()+"%");
+									alarmMsg.setValue(Double.valueOf(sensor.getV3().toString()));
+									if(v3low == -1){
+										alarmMsg.setConfirm(0);
+									}else{
+										alarmMsg.setConfirm(1);
+									}
+									map.put("v3StartWarnTime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()));
+									alarmMsgService.saveAlarmMsg(alarmMsg);
+									map.put("v3AlarmMsg", alarmMsg.getId());
+								}else{
+									map.put("v3AlarmMsg",  partsQuence.get(sensor.getLmu().getId()).get("v3AlarmMsg"));
+								}
+								
+							}
+							map.put("v3Time", v3Time);
+						}else{
+							map.put("v3AlarmMsg", 0);
+						}
+					}
+				}	
+				//递增代表最新消息
+				if(partsQuence.get(sensor.getLmu().getId()) == null){
+					map.put("wsDestoryTime", 1);
+				}else{
+					map.put("wsDestoryTime", Integer.parseInt(partsQuence.get(sensor.getLmu().getId()).get("wsDestoryTime").toString()) + 1);
+				} 
+				partsQuence.put(sensor.getLmu().getId(),map);
+			} catch (Exception e) {
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < data.length; i++) {
+					sb.append(data[i] +" ");
+				}
+				DTU dtu = (DTU) session.getAttribute("dtu");
+				System.out.println(dtu.getName()+",id:"+dtu.getId()+",(温湿度)数据处理异常"+sb.toString());
+			}
+		}
+	}
+}

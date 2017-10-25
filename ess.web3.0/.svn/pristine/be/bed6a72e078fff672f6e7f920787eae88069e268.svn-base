@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="system" namespace="/" extends="json-default">
+		<!-- new -->
+		<action name="stationEdit" class="com.action.system.StationAction" method="StationEdit">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="dtuEdit" class="com.action.system.DTUAction" method="DtuEdit">
+			<!--<interceptor-ref name="json">  
+				<param name="contentType">application/json</param>  
+			</interceptor-ref> -->
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="vedioDtu" class="com.action.system.DTUAction" method="vedioDtu">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+			</result>
+		</action>
+		<action name="createLmus" class="com.action.system.DTUAction" method="CreateLmus">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="param" class="com.action.system.ParamsAction" method="param">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="paramEdit" class="com.action.system.ParamsAction" method="update">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="stationTree" class="com.action.IndexAction" method="StationTree">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="createDtus" class="com.action.IndexAction" method="CreateDtus">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="listLmuLimit" class="com.action.system.LmuAction" method="ListLmuLimit">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="updateLmuLimit" class="com.action.system.LmuAction" method="UpdateLmuLimit">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="editLmuLimit" class="com.action.system.LmuAction" method="EditLmuLimit">
+			<result type="json"/>
+		</action>
+	</package>
+</struts>

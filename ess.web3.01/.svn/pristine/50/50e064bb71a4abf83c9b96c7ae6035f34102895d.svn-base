@@ -1,0 +1,27 @@
+package com.core;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class MyApplicationContext {
+	
+	private MyApplicationContext(){
+		ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+	}
+	
+	private static MyApplicationContext myApplicationContext;
+	
+	public static MyApplicationContext getInstance(){
+		if(myApplicationContext==null){
+			myApplicationContext = new MyApplicationContext();
+		}
+		return myApplicationContext;
+	}
+	
+	private ApplicationContext ctx;
+	
+	public ApplicationContext getCtx(){
+		return ctx;
+	}
+	
+}

@@ -1,0 +1,222 @@
+package com.socket;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
+//import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
+//import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.transport.socket.SocketAcceptor;
+import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
+
+import com.core.MyApplicationContext;
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.Sensor;
+import com.protocol.CRC;
+import com.service.DtuService;
+import com.service.SensorService;
+import com.unit.MessageQueue;
+
+//@Scope("singleton")
+//@Service("minaServer")
+public class MinaServer {
+
+	public static void main(String[] args) {
+		// DtuService dtuService =
+		// (DtuService)MyApplicationContext.getInstance().getCtx().getBean("dtuService");
+	}
+
+	public SocketAcceptor acceptor;
+
+	private DtuService dtuService;
+
+	private SensorService sensorService;
+
+	private boolean isrun;
+
+	private Thread thread;
+
+	// ApplicationContext ctx;
+	public void init() {
+		System.out.println("--------------------------socket开始初始化-------------------------------");
+		acceptor = new NioSocketAcceptor(Runtime.getRuntime().availableProcessors() + 1);
+		acceptor.getSessionConfig().setIdleTime(IdleStatus.READER_IDLE, 120);// 读(接收通道)空闲时间:40秒
+		// DefaultIoFilterChainBuilder chain = acceptor.getFilterChain();
+		// chain.addLast("codec", new ProtocolCodecFilter(new ));
+		// ctx = new ClassPathXmlApplicationContext("spring-hibernate.xml");
+		messageQueue = (MessageQueue) MyApplicationContext.getInstance().getCtx().getBean("messageQueue");
+		dtuService = (DtuService) MyApplicationContext.getInstance().getCtx().getBean("dtuService");
+		sensorService = (SensorService) MyApplicationContext.getInstance().getCtx().getBean("sensorService");
+		acceptor.setHandler(new BexnHandler());
+		dtuList = dtuService.DTUlist();
+		isrun = true;
+		System.out.println("--------------------------socket初始化结束-------------------------------");
+	}
+
+	private static MinaServer minaServer;
+
+	public static MinaServer instance() throws Exception {
+		if (minaServer == null) {
+			minaServer = new MinaServer();
+		}
+		return minaServer;
+	}
+
+	private MinaServer() throws Exception {
+		init();
+	}
+
+	public void start() throws IOException {
+		acceptor.bind(new InetSocketAddress(50000));
+		thread = new Thread(new MyRunnable());
+		thread.start();
+	}
+
+	public void close() {
+		isrun = false;
+		acceptor.dispose();
+	}
+
+	class MyRunnable implements Runnable {
+		@Override
+		public void run() {
+			while (isrun) {
+				for (IoSession session : acceptor.getManagedSessions().values()) {
+					sendCmd(session);
+				}
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void sendCmd(IoSession session) {
+		DTU dtu = (DTU) session.getAttribute("dtu");
+		if (dtu == null) {
+			return;
+		}
+		Set<LMU> lmuList = dtu.getLmus();
+		for (LMU lmu : lmuList) {
+			byte[] cmd = new byte[8];
+			cmd[0] = (byte) lmu.getCode();
+			cmd[1] = 0x03;
+			cmd[2] = 0x00;
+			cmd[3] = 0x00;
+			cmd[4] = 0x00;
+			cmd[5] = 0x02;
+			CRC crc = new CRC();
+			crc.CrcMake(6, cmd);
+			cmd[6] = crc.getBYCRCHi();
+			cmd[7] = crc.getBYCRCLo();
+			session.write(IoBuffer.wrap(cmd));
+		}
+	}
+
+	private List<DTU> dtuList;
+
+	private MessageQueue messageQueue;
+
+	class BexnHandler extends IoHandlerAdapter {
+
+		private void init(IoSession session) {
+			String ip = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
+			for (DTU dtu : dtuList) {
+				if (ip.equals(dtu.getIP())) {
+					session.setAttribute("id", dtu.getId());
+					session.setAttribute("dtu", dtu);
+					return;
+				}
+			}
+			session.close(true);
+		}
+
+		private void close(IoSession session) {
+			DTU dtu = (DTU) session.getAttribute("dtu");
+			messageQueue.remove(dtu);
+			session.close(true);
+		}
+
+		private void analysis(IoSession session, Object message) {
+			IoBuffer ioBuffer = (IoBuffer) message;
+
+			byte[] buff = new byte[ioBuffer.limit()];
+			float doo = 1;
+			float wd = 1111;
+			DTU dtu = (DTU) session.getAttribute("dtu");
+			Sensor sensor = new Sensor();
+			sensor.setId(UUID.randomUUID().toString());
+			sensor.setDtuId(String.valueOf(dtu.getId()));
+			for (LMU lmu : dtu.getLmus()) {
+				if (lmu.getCode() == buff[0]) {
+					sensor.setLmu(lmu);
+					break;
+				}
+			}
+			sensor.setDtuName(dtu.getName());
+			sensor.setV0(new BigDecimal(doo).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV1(new BigDecimal(Math.random()*2+1).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV2(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV3(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV4(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV5(new BigDecimal(wd).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV6(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV7(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV8(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV9(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV10(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setV11(new BigDecimal(0).setScale(2, BigDecimal.ROUND_HALF_UP));
+			sensor.setAddtime(Calendar.getInstance());
+			messageQueue.put(dtu, sensor);
+			try {
+				sensorService.insert(sensor);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		//客户端会话打开
+		@Override
+		public void sessionOpened(IoSession session) throws Exception {
+			init(session);
+			super.sessionOpened(session);
+		}
+		//客户端会话关闭"
+		@Override
+		public void sessionClosed(IoSession session) throws Exception {
+			close(session);
+			super.sessionClosed(session);
+		}
+		//客户端会话休眠
+		@Override
+		public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+			close(session);
+			super.sessionIdle(session, status);
+		}
+		//客户端异常
+		@Override
+		public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+			close(session);
+			super.exceptionCaught(session, cause);
+		}
+		
+		//服务端获取消息
+		@Override
+		public void messageReceived(IoSession session, Object message) throws Exception {
+			analysis(session, message);
+			super.messageReceived(session, message);
+		}
+
+	}
+}

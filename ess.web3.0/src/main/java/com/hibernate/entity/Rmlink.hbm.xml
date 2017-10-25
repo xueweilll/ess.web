@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Rmlink" table="rmlink">
+	<id name="Id" column="Id"/>
+	<property name="Mid" column="Mid"/>
+	<property name="Rid" column="Rid"/>
+	<!-- many-to-one配置 -->
+	<many-to-one name="menu" column="Mid" class="com.hibernate.entity.Menu" lazy="false" fetch="join" insert="false" update="false"/>
+	</class>
+</hibernate-mapping>

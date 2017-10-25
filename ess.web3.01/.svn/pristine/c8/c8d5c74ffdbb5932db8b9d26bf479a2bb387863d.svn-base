@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Alarm" table="alarm">
+	<id name="id" column="Id"/>
+	<property name="dtuId" column="DtuId" length="100"/>
+	<property name="lmuId" column="LmuId"/>
+	<property name="startTime" column="StartTime" type="calendar" />
+	<property name="endTime" column="EndTime" type="calendar" />
+	<property name="confirm" column="Confirm" type="boolean"/>
+	<!-- many-to-one配置 -->
+	<many-to-one name="dtu" column="DtuId" class="com.hibernate.entity.DTU" lazy="false" fetch="join" insert="false" update="false"/>
+	<many-to-one name="lmu" column="LmuId" class="com.hibernate.entity.LMU" lazy="false" fetch="join" insert="false" update="false"/>
+	</class>
+</hibernate-mapping>

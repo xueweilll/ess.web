@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Station" table="station">
+	<id name="id" />
+	<property name="stationname" length="100"/>
+	<property name="stationaddress" length="100"/>
+	<property name="stationmap"/>
+	<property name="stationx" type="double"/>
+	<property name="stationy" type="double"/>
+	<property name="pareid"/>
+	<property name="level"/>
+	</class>
+</hibernate-mapping>

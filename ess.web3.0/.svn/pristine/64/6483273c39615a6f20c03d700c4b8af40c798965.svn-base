@@ -1,0 +1,266 @@
+package com.action.system;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.action.ActionBase;
+import com.google.gson.reflect.TypeToken;
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.Lmulimit;
+import com.hibernate.entity.PartSensor;
+import com.service.DtuService;
+import com.service.LmuLimitService;
+import com.service.LmuService;
+import com.unit.LmuMsgQuence;
+import com.unit.MessageQueue;
+import com.unit.PartsQuence;
+import com.untils.BeanToMapUtils;
+
+public class DTUAction extends ActionBase {
+
+	/**
+	 * ҳ��Action
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public String execute() {
+
+		return "success";
+	}
+
+	/**
+	 * ajax method
+	 */
+	@Autowired
+	private DtuService dtuService;
+	@Autowired
+	private MessageQueue messageQueue;
+	@Autowired
+	private PartsQuence partsQuence;
+	@Autowired
+	private LmuLimitService limitService;
+	@Autowired
+	private LmuMsgQuence lmuMsgQuence;
+	/*public void setDtuService(DtuService dtuService) {
+		this.dtuService = dtuService;
+	}*/
+	
+	
+	
+	private int status;
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	/*
+	 * private int id; private String code; private String name; private String
+	 * address; private String IP; private double dtuX; private double dtuY;
+	 * private int stationId; private int level; private int Port; private
+	 * boolean isTogether; private int eqNum;
+	 * 
+	 * public void setId(int id) { this.id = id; }
+	 * 
+	 * public void setCode(String code) { this.code = code; }
+	 * 
+	 * public void setName(String name) { this.name = name; }
+	 * 
+	 * public void setAddress(String address) { this.address = address; }
+	 * 
+	 * public void setIP(String iP) { IP = iP; }
+	 * 
+	 * public void setDtuX(double dtuX) { this.dtuX = dtuX; }
+	 * 
+	 * public void setDtuY(double dtuY) { this.dtuY = dtuY; }
+	 * 
+	 * public void setStationId(int stationId) { this.stationId = stationId; }
+	 * 
+	 * public void setLevel(int level) { this.level = level; }
+	 * 
+	 * public void setPort(int port) { Port = port; }
+	 * 
+	 * public void setTogether(boolean isTogether) { this.isTogether =
+	 * isTogether; }
+	 * 
+	 * public void setEqNum(int eqNum) { this.eqNum = eqNum; }
+	 */
+	private boolean result;
+
+	public boolean getResult() {
+		return result;
+	}
+
+	private DTU dtu;
+
+	public void setDtu(String dtu) {
+		//this.dtu = (DTU) JsonUtil.getDTO(dtu, DTU.class);
+		this.dtu = gson.fromJson(dtu, DTU.class);
+	}
+
+	private List<LMU> listLmu =  new ArrayList<LMU>();
+
+	//@SuppressWarnings("unchecked")
+	public void setListLmu(String listLmu) {
+		//this.listLmu = (List<LMU>) JsonUtil.getDTOList(listLmu, LMU.class);
+		//this.listLmu = gson.fromJson(listLmu,(new ArrayList<LMU>()).getClass());
+		this.listLmu = gson.fromJson(listLmu,new TypeToken<List<LMU>>(){}.getType());
+	}
+
+	public String DtuEdit() {
+		/*
+		 * System.out.println("this received data is "+jsonObj); JSONArray array
+		 * = JSONArray.fromObject(jsonObj); List<LMU> list = new ArrayList<>();
+		 * for(int i=0;i<array.size();i++){ JSONObject obj =
+		 * array.getJSONObject(i); LMU lmu = (LMU)
+		 * JSONObject.toBean(obj,LMU.class); list.add(lmu);
+		 * System.out.println("this is the lmu's name "+lmu.getName()); }
+		 */
+		/*
+		 * System.out.println("this is the dtu's name "+dtu.getName()); for(LMU
+		 * lmu : listLmu){
+		 * System.out.println("this is the lmu's name "+lmu.getName()); }
+		 */
+
+		result = false;
+
+		if (status == 0) { // 删除
+			try {
+				dtu = dtuService.dtu(dtuId);
+				List<LMU> lmulist = lmuService.LMUlist(dtuId);
+				//删除站点以及设备以及站点报警数据
+				dtuService.DeleteDTUAndLMUS(dtuId);
+				for(Map.Entry<DTU, PartSensor> e: messageQueue.getCacheData().entrySet() ){
+					if(e.getKey().getId() == dtuId){
+						//删除map中的dtu
+						messageQueue.remove(e.getKey());
+						for (LMU lmu : lmulist) {
+							//删除partmap中的接收数据
+							partsQuence.remove(lmu.getId());
+							limitService.deleteLmuLimit(lmu.getId());
+							//删除各个对应设备上下限
+							lmuMsgQuence.remove(lmu.getId());
+						}
+						break;
+					}
+				}
+				SaveSysLogByUser(1,
+						this.getText("PUBLIC_DL") + this.getText("DTU_T") + ":"
+								+ dtu.getName());
+				for (LMU lmu : lmulist) {
+					SaveSysLogByUser(1,
+							this.getText("PUBLIC_DL") + this.getText("LMU_T")
+									+ ":" + lmu.getName() + "(" + dtu.getName()
+									+ ")");
+				}
+				result = true;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		} else {
+			if (status == 1) { // 新增
+				try {
+					dtuService.SaveDTUAndLMUS(dtu, listLmu);
+					PartSensor partSensor = new PartSensor();
+					partSensor.setDtuId(dtu.getId());
+					partSensor.setDuoName(dtu.getName());
+					partSensor.setType(2);
+					DTU dtu1 = dtuService.dtu(dtu.getId());
+					messageQueue.put(dtu1, partSensor);
+					/*for(Map.Entry<DTU, PartSensor> e: messageQueue.getCacheData().entrySet() ){
+						if(dtu.getId() == e.getKey().getId()){
+							//更新当前站点IP
+							e.getKey().setIP(dtu.getIP());
+							//更新当前站点名称
+							e.getKey().setName(dtu.getName());
+							Set<LMU> set = e.getKey().getLmus();
+							for (LMU lmu : set) {
+								
+							}
+						}
+					}*/
+					SaveSysLogByUser(1,
+							this.getText("PUBLIC_IS") + this.getText("DTU_T")
+									+ ":" + dtu.getName());
+					for (LMU lmu : listLmu) {
+						SaveSysLogByUser(
+								1,
+								this.getText("PUBLIC_IS")
+										+ this.getText("LMU_T") + ":"
+										+ lmu.getName() + "(" + dtu.getName()
+										+ ")");
+					}
+					result = true;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			} else if (status == 2) { // 更新
+				try {
+					dtuService.UpdateDTUAndLMUS(dtu, listLmu);
+					SaveSysLogByUser(1,
+							this.getText("PUBLIC_UP") + this.getText("DTU_T")
+									+ ":" + dtu.getName());
+					for (LMU lmu : listLmu) {
+						SaveSysLogByUser(
+								1,
+								this.getText("PUBLIC_UP")
+										+ this.getText("LMU_T") + ":"
+										+ lmu.getName() + "(" + dtu.getName()
+										+ ")");
+					}
+					result = true;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		
+		List<LMU> list = lmuService.LMUlist(dtu.getId());
+		for (LMU lmu : list) {
+			List<Lmulimit> limitList = limitService.getByLmuId(lmu.getId());
+			if(limitList.size() == 0){
+				Lmulimit lmulimit = new Lmulimit();
+				lmulimit.setType(0);
+				lmulimit.setLmuId(lmu.getId());
+				lmuMsgQuence.put(lmu.getId(), BeanToMapUtils.toMap(lmulimit));
+				limitService.saveLmuLimit(lmulimit);				
+			}
+		}
+		return "success";
+	}
+
+	private List<LMU> arrLmu;
+
+	public List<LMU> getArrLmu() {
+		return arrLmu;
+	}
+
+	@Autowired
+	private LmuService lmuService;
+
+	/*public void setLmuService(LmuService lmuService) {
+		this.lmuService = lmuService;
+	}*/
+
+	private int dtuId;
+
+	public void setDtuId(int dtuId) {
+		this.dtuId = dtuId;
+	}
+
+	public String CreateLmus() {
+		arrLmu = lmuService.LMUlist(dtuId);
+		/*if(arrLmu==null){
+			arrLmu = new ArrayList<LMU>();
+		}*/
+		return "success";
+	}
+	
+	public String VedioDtu(int id){
+		dtu = dtuService.dtu(id);
+		return "success";
+	}
+}

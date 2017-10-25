@@ -1,0 +1,10 @@
+package com.protocol;
+
+import java.util.Map;
+
+public interface YZCProtocol {
+	
+	byte[] readCmd(int code);
+	
+	Map<String,String> anlysis(byte[] data);
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="page" namespace="/" extends="struts-default">
+		<interceptors>
+			<interceptor name="permission" class="com.common.Interceptor.PermissionInterceptor"/>
+			<interceptor-stack name="permissionStack">
+				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="permission"/>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="permissionStack"/>
+		<default-action-ref name="login"/>
+		<action name="login" class="com.action.LoginAction">
+			<interceptor-ref name="defaultStack"/>
+			<result>
+			/WEB-INF/page/login.jsp
+			</result>
+		</action>
+		<action name="index" class="com.action.IndexAction">
+			<interceptor-ref name="permission"/>
+			<result>
+				/WEB-INF/page/index.html
+			</result>
+		</action>
+		<action name="home" class="com.action.IndexAction" method="map">
+			<result>
+				/WEB-INF/page/index/map.jsp
+			</result>
+		</action>
+		<action name="user" class="com.action.limit.UserAction" method="user">
+			<result>
+				/WEB-INF/page/limit/user.jsp
+			</result>
+		</action>
+		<action name="limit" class="com.action.limit.LimitAction" method="limit">
+			<result>
+				/WEB-INF/page/limit/limit.jsp
+			</result>
+		</action>
+		<action name="station" class="com.action.system.StationAction">
+			<result>
+				/WEB-INF/page/system/station.jsp
+			</result>
+		</action>
+		<action name="dtu" class="com.action.system.DTUAction">
+			<result>
+				/WEB-INF/page/system/dtu.jsp
+			</result>
+		</action>
+		<!--<action name="group" class="com.action.system.GroupAction">
+				<result>
+					/WEB-INF/page/system/group.jsp
+				</result>
+			</action>-->
+		<action name="possess" class="com.action.monitor.AllmtAction">
+			<result>
+				/WEB-INF/page/monitor/allmt.jsp
+			</result>
+		</action>
+		<action name="police" class="com.action.monitor.PoliceAction">
+			<result>
+				/WEB-INF/page/monitor/police.jsp
+			</result>
+		</action>
+		<action name="history" class="com.action.analysis.HistoryAction" method="history">
+			<result>
+				/WEB-INF/page/analysis/history.jsp
+			</result>
+		</action>
+		<action name="record" class="com.action.analysis.SyslogAction" method="syslog">
+			<result>
+				/WEB-INF/page/analysis/syslog.jsp
+			</result>
+		</action>
+			<action name="lmu" class="com.action.system.LmuAction">
+			<result>
+				/WEB-INF/page/system/lmulimit.jsp
+			</result>
+		</action>
+			<action name="historyPolice" class="com.action.analysis.HistoryPoliceAction" method="historyPolice">
+			<result>
+				/WEB-INF/page/analysis/historyPolice.jsp
+			</result>
+		</action>
+		
+		<!--<action name="set" class="com.action.system.ParamsAction" method="param">
+			<result>
+				/WEB-INF/page/system/param.jsp
+			</result>
+		</action>-->
+	</package>
+</struts>

@@ -1,0 +1,526 @@
+Ext.require('Ext.Ajax');
+function BindXY(currentLat, currentLon) {
+}
+var data 
+Ext.onReady(function() {
+	data = Ext.create('Ext.data.Store', {
+		fields : ['lat', 'lon','img','type','title'],
+		proxy : {
+			type : 'ajax',
+			url : 'mapMarkers.html',
+			reader : {
+				type : 'json',
+				root : 'markers',
+				successProperty : 'success'
+			}
+		},
+		autoLoad : true
+	});
+	
+	data.addListener('load', function(st, rds, opts) {
+		reload();
+	});
+	
+	Ext.create('Ext.container.Viewport', {
+		title : 'Fit Layout',
+		margin : '0 0 0 0',	
+		width : '100%',
+		height : '100%',
+		layout : 'border',
+		items : [{
+					title : '区域列表',
+					// id : "treeview",
+					width : 200,
+					border : false,
+					collapsible : true,
+					split : true,
+					region : 'west',
+					html : "<div id='treeview' style='width:100%;height:100%'></div>"
+				}, {
+					// xtype : 'Ext.panel.Panel',
+					id:'aa',
+					title : '猪舍',
+					border : false,
+					region : 'center',
+					  width: '100%',
+					  height: '100%',
+					  html:'<div id="bb"  style="width:100%;height:100%;background:url(image/dapmap.png) no-repeat 0 0;background-size:100% 100%"></div>',
+					/*  bodyStyle : 'width:100%;height:100%;background:url(image/dap.jpg) no-repeat 0 0;background-size:100% 100%;position:relative;',
+					//bodyStyle : 'background-image:url(image/dap.jpg);background-repeat: no-repeat;filter:"progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=\'scale\')";-moz-background-size:100% 100%;background-size:100% 100%;',
+					items:[{
+						xtype : 'dataview',
+						    id:'banksView',  
+			                store: data, 
+			                trackOver:true,
+			                multiSelect:true,  
+			                itemSelector: 'div.bank',  
+			                selectedItemCls:'bank-selected',  
+			                overItemCls: 'bank-hover' ,
+			                tpl : new Ext.XTemplate(
+								'<div>',
+								'<tpl for=".">',
+								'<img src="image/{img}.gif" style="top:{lat}%;left:{lon}%;width:21px;height:21px;position:absolute" onmouseover="showDTO({type},\'{title}\')" onmouseout="hideDTO()" onclick="ShowDetial({id})" />',
+								'</tpl>',
+								'</div>'
+			                )*//*,
+			                listeners : {
+			                    render : function() {
+			                        Ext.fly(this.el).on('click', function(e, t) {
+			                        		console.log(this.el);
+			                            });
+			                        }
+			                }
+					}]*/
+				}],
+		renderTo : Ext.getBody()
+	});
+	
+	
+	
+	CreateTree();
+	//CreateMap();
+	CreateMarkers(0);
+});
+
+
+function ShowDetial(id) {
+
+
+	var store = Ext.create('Ext.data.Store', {
+				model : 'CurrIrItem',
+				proxy : {
+					type : 'ajax',
+					url : 'currentIrStore1.html',
+					method : 'POST',
+					async : true,
+					extraParams : {
+						dtuId : id
+					},
+					reader : {
+						type : 'json',
+						root : 'dtuListMsg',
+						successProperty : 'success'
+					}
+				},
+				autoLoad : true
+			});
+
+	
+	var intervalIr = setInterval(function() {
+				store.reload();
+			}, 5000);
+
+	
+	Ext.create('Ext.window.Window', {
+		title : '控制面板',
+		height : 500,
+		width : 800,
+		modal:true,
+		//layout : 'fit',
+		items : [
+		         {
+			  xtype: 'panel',
+			  modal:true,
+			  //layout : 'fit',
+			  height : 380,
+		      width : 800,
+			  title: '视频监控', 
+			  html : '<iframe src="vedio.jsp?id='+id+'" width=100% height=100% border=0 scrolling="no"></iframe>',
+			  //html:'<div style="width:100%;height:100%;border:1px solid #0033ff"></div>',
+			  border:false 
+		},{
+			xtype : 'grid',
+			id : 'IrPanel',
+			border : false,
+			store : store,
+			height : 100,
+			/*width : 800,*/
+			//margins : '330 0 0 0',
+			columns : [{
+				header : '站点名称',
+				dataIndex : 'duoName',
+				flex : 1
+			}, {
+				header : '氨气浓度(ppm)',
+				dataIndex : 'v1',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else{
+						if(record.raw.v1Police=="0"){
+							return value;
+						}else{
+							return "<font color=red>"+value+"</font>"
+						}
+					}
+		        }
+			}, {
+				header : '温度(℃)',
+				dataIndex : 'v2',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else{
+						 if(record.raw.v2Police=="0"){
+								return value;
+						 }else{
+								return "<font color=red>"+value+"</font>"
+						 }
+					}
+		        }
+			}, {
+				header : '湿度(%)',
+				dataIndex : 'v3',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else{
+						 if(record.raw.v3Police=="0"){
+							return value;
+						}else{
+							return "<font color=red>"+value+"</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电一路',
+				dataIndex : 'v4',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v4Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v4Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电二路',
+				dataIndex : 'v5',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v5Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v5Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电三路',
+				dataIndex : 'v6',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v6Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v6Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电四路',
+				dataIndex : 'v7',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v7Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v7Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电5路',
+				dataIndex : 'v8',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v8Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v8Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电6路',
+				dataIndex : 'v9',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v9Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v9Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电7路',
+				dataIndex : 'v10',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v10Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v10Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '市电8路',
+				dataIndex : 'v11',
+				flex : 1,
+				renderer:function(value, cellmeta, record, rowIndex, columnIndex, store){
+					if(value == ""){
+						return "设备断开";
+					}else if(value == 0){
+						if(record.raw.v11Police=="0"){
+							return "断开";
+						}else{
+							return "<font color=red>断开</font>"
+						}
+					}else{
+						if(record.raw.v11Police=="0"){
+							return "常通";
+						}else{
+							return "<font color=red>常通</font>"
+						}
+					}
+		        }
+			}, {
+				header : '采集时间',
+				dataIndex : 'addtime',
+				flex : 2,
+				type:'date',
+				dateFormat: 'yyyy-MM-dd HH:mm:ss'
+			}],
+			viewConfig : {
+				loadMask : false
+			}
+		}
+/*		new Ext.Panel({
+			title: 'My Panel',
+			collapsible:true,
+			width:400,
+			id:'panel1',
+			margins : '0 0 0 0',
+			html:'<iframe src="http://www.baidu.com" id="map_iframe" noresize="noresize" width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="yes" style="border-top-width: 0px; border-left-width: 0px; border-bottom-width: 0px; width: 728px; height: 455px; border-right-width: 0px"></iframe>'
+			})
+*/
+
+/*{
+			title: '弹出的窗口', 
+		    header:false,
+		    html : '<iframe src="http://www.baidu.com" id="map_iframe" noresize="noresize" width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="yes" style="border-top-width: 0px; border-left-width: 0px; border-bottom-width: 0px; width: 728px; height: 455px; border-right-width: 0px"></iframe>', 
+		    border:false }*/
+
+		         
+		],
+		listeners : {
+			"close" : function() {
+				clearTimeout(intervalIr);
+			}
+		}
+	}).show();
+
+}
+
+function CreateMarkers(pareId) {
+	var intervalMarker = setInterval(function() {
+		data.reload();
+		if(pann != null){
+			pann.close();
+		}
+	}, 10000);
+	
+//	if (markers != null) {
+//		map.removeLayer(markers);
+//	}
+//	markers = new OpenLayers.Layer.Markers("Markers");
+//	map.addLayer(markers);
+	/*data.on('load', function() {	
+				data.each(function(record) {
+				//	 zb += "<img src='image/ls.png' style='top:"+record.data.lat+"%;left:"+record.data.lon+"%;width:4%;height:auto;position:absolute' onmouseover='showDTO()' onmouseout='hideDTO()'/>";
+//						var src = "marker-blue.png";
+//						if (record.get('line')) {
+//							src = "marker-green.png";
+//						}
+//						alert(record.get('id'));
+//						BindMarkers(record.get('title'), record.get('lat'),record.get('lon'), src, record.get('id'),ShowDetial);
+					 //document.getElementById("mapview").innerHTML(zb);
+				});
+				//Ext.getCmp('mapview').html = zb;
+				//Ext.getCmp('bb').body.update("<div id='mapview' style='width:100%;height:100%;background:url(image/dap.jpg) no-repeat 0 0;background-size:100% 100%;position:relative;'>"+zb+"</div>");
+			});*/
+} 
+
+var pann;
+function showDTO(type,title){
+	var status;
+	if(type == 0){
+		status = '正常';
+	}else if(type == 1){
+		status = '异常';
+	}else if(type == 2){
+		status = '断网';
+	}
+	pann = Ext.create('Ext.window.Window', {
+		title : "站点信息",
+		height : 100,
+		width : 200,
+		layout : 'fit',
+		html : "<p>站点名称："+title+"</p><p>当前状态： "+status+"</p>"
+	});
+	pann.show();
+}
+
+
+
+
+function hideDTO(){
+	pann.hide();
+}
+
+function CreateTree() {
+	Ext.define('Marker', {
+				extend : 'Ext.data.Model',
+				fields : [{
+							name : 'id',
+							type : 'string'
+						}, {
+							name : 'lat',
+							type : 'double'
+						}, {
+							name : 'lon',
+							type : 'double'
+						}, {
+							name : 'level',
+							type : 'int'
+						}, {
+							name : 'text',
+							type : 'string'
+						}]
+			});
+	var store = Ext.create('Ext.data.TreeStore', {
+				id : 'store',
+				model : 'Marker',
+				proxy : {
+					type : 'ajax',
+					url : 'stationTree.html'
+				},
+				reader : {
+					type : 'json',
+					root : 'children',
+					successProperty : 'success'
+				},
+				clearOnLoad : true,
+				root : {
+					id : '0',
+					text : '所有区域',
+					expanded : true
+				},
+				autoLoad : false
+
+			});
+
+		
+	
+	Ext.create('Ext.tree.Panel', {
+				renderTo : 'treeview',
+				border : false,
+				width : '100%',
+				height : '100%',
+				store : store,
+				// dataUrl:'stationTree.html',
+				rootVisible : false,
+				listeners : {
+					itemclick : function(view, record, item, index, e, eOpts) {
+						/*
+						 * //Ext.Msg.alert(record.get('id')); var map =
+						 * Ext.getCmp("map2"); //map.marker.setPosition(new
+						 * google.maps.LatLng(31.22,121.45)); var marker = new
+						 * google.maps.Marker({ position:new
+						 * google.maps.LatLng(0,0), map:map, draggable:true,
+						 * title:"position" }); map.addMarker(marker);
+						 */
+						// alert(record.get('lat'));
+						pareId = record.get('id');
+						
+						// alert(pareId);
+						//SetCenter(record.get('lat'), record.get('lon'), record.get('level'));
+						data.reload({
+							params : {
+								pareId : pareId
+							}
+						});
+					}
+				}
+			});
+}
+

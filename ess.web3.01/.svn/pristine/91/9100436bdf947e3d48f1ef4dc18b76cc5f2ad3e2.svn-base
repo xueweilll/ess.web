@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="User" table="user">
+	<id name="id" column="Id"  type="java.lang.Integer">
+         <generator class="native"/>
+     </id>
+	<property name="username" length="100"/>
+	<property name="password" length="100"/>
+	<property name="logintime" length="100"/>
+	<property name="email" length="100"/>
+	<property name="rid"/>
+	<!-- many-to-one配置 -->
+	<many-to-one name="role" column="rid" class="com.hibernate.entity.Role" lazy="false" fetch="join" insert="false" update="false"/>
+	</class>
+</hibernate-mapping>

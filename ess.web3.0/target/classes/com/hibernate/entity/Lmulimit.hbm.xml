@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity" >
+	<class name="Lmulimit" table="lmulimit" dynamic-insert="true" dynamic-update="true" >
+	<id name="id" column="Id"/>
+	<property name="lmuId"/>
+	<property name="a1" column="a1"/>
+	<property name="a2" column="a2"/>
+	<property name="w1" column="w1"/>
+	<property name="w2" column="w2"/>
+	<property name="s1" column="s1"/>
+	<property name="s2" column="s2"/>
+	<property name="sd1" column="sd1"/>
+	<property name="sd2" column="sd2"/>
+	<property name="sd3" column="sd3"/>
+	<property name="sd4" column="sd4"/>
+	<property name="sd5" column="sd5"/>
+	<property name="sd6" column="sd6"/>
+	<property name="sd7" column="sd7"/>
+	<property name="sd8" column="sd8"/>
+	<property name="arate" column="arate"/>
+	<property name="wrate" column="wrate"/>
+	<property name="srate" column="srate"/>
+	<property name="type" column="type"/>
+	</class>
+</hibernate-mapping>

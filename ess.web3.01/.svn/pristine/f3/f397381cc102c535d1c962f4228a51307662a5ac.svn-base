@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>大棚数据采集系统</title>
+<link href="extjs/resources/css/ext-all.css" rel="stylesheet"
+	rev="stylesheet" type="text/css" />
+<link href="css/style.css" rel="stylesheet" rev="stylesheet"
+	type="text/css" />
+<script type="text/javascript" src="extjs/ext-all.js"></script>
+<script type="text/javascript" src="js/model/model.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+</head>
+
+<body>
+	<!-- use class="x-hide-display" to prevent a brief flicker of the content -->
+	<div id="west" class="x-hide-display"></div>
+	<div id="center2" class="x-hide-display"></div>
+	<div id="center1" class="x-hide-display"></div>
+	<div id="props-panel" class="x-hide-display"
+		style="width: 200px; height: 200px; overflow: hidden;"></div>
+	<div id="south" class="x-hide-display">
+		<p>south - generally for informational stuff, also could be for
+			status bar</p>
+	</div>
+</body>
+</html>

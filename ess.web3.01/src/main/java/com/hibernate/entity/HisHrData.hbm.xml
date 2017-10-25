@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="HisHrData" table="hishrdata">
+	<id name="id"/>
+	<property name="dtuId" column="DTUId" length="100"/>
+	<property name="lmuId" column="LMUId"/>
+	<property name="addtime" column="Addtime" type="calendar" />
+	<property name="Hr0" length="100" />
+	<property name="Hr1" length="100" />
+	<property name="Hr2" length="100" />
+	<property name="Hr3" length="100" />
+	<property name="Hr4" length="100" />
+	<property name="Hr5" length="100" />
+	<property name="Hr6" length="100" />
+	<property name="Hr7" length="100" />
+	<property name="Hr8" length="100" />
+	<property name="Hr9" length="100" />
+	<property name="Hr10" length="100" />
+	<property name="Hr11" length="100" />
+	<property name="Hr12" length="100" />
+	<property name="Hr13" length="100" />
+	<property name="Hr14" length="100" />
+	<property name="Hr15" length="100" />
+	<property name="Hr16" length="100" />
+	<property name="Hr17" length="100" />
+	<property name="Hr18" length="100" />
+	<property name="Hr19" length="100" />
+	<property name="Hr20" length="100" />
+	<property name="Hr21" length="100" />
+	<property name="Hr22" length="100" />
+	<property name="Hr23" length="100" />
+	<property name="Hr24" length="100" />
+	<property name="Hr25" length="100" />
+	<property name="Hr26" length="100" />
+	<property name="Hr27" length="100" />
+	<property name="Hr28" length="100" />
+	<property name="Hr29" length="100" />
+	<property name="Hr30" length="100" />
+	<property name="Hr31" length="100" />
+	<property name="Hr32" length="100" />
+	</class>
+</hibernate-mapping>

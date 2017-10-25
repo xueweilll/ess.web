@@ -1,0 +1,133 @@
+package com.common.contral;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.common.param.paramers;
+import com.core.MyApplicationContext;
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.HisHrData;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.Sensor;
+import com.service.CurrentIrDataService;
+import com.service.HisHrDataService;
+import com.service.LmuService;
+import com.unit.MessageQueue;
+
+public class CurrStore {
+	private LmuService lmuService;
+	private HisHrDataService hisHrDataService;
+
+	public CurrStore(CurrentIrDataService currentIrDataService, LmuService lmuService,
+			HisHrDataService hisHrDataService) {
+		this.lmuService = lmuService;
+		this.hisHrDataService = hisHrDataService;
+		this.messageQueue = (MessageQueue)MyApplicationContext.getInstance().getCtx().getBean("messageQueue");
+	}
+
+	private ArrayList<CurrIrItem> arrIrList;
+
+	MessageQueue messageQueue;
+
+	public ArrayList<CurrIrItem> CreateCurrIrData(Integer[] dtuIds) {
+		arrIrList = new ArrayList<>();
+		CurrIrItem currIrItem;
+		DTU dtu;
+		Sensor sensor;
+		ConcurrentHashMap<DTU, Sensor> cacheData = messageQueue.getCacheData();
+		for (Map.Entry<DTU, Sensor> e : cacheData.entrySet()) {
+			for(int i = 0 ; i < dtuIds.length ; i ++){
+				if(dtuIds[i] == e.getKey().getId()){
+					dtu = e.getKey();
+					sensor = e.getValue();
+					currIrItem = new CurrIrItem();
+					currIrItem.setId(sensor.getLmu().getId());
+					currIrItem.setName(dtu.getName() + "-" + sensor.getLmu().getName());
+					currIrItem.setV0(String.valueOf(sensor.getV0()) + " mg/L");
+					currIrItem.setV1(String.valueOf(sensor.getV1()) + " ");
+					currIrItem.setV2(String.valueOf(sensor.getV2()) + " ");
+					currIrItem.setV3(String.valueOf(sensor.getV3()) + " ");
+					currIrItem.setV4(String.valueOf(sensor.getV4()) + " ");
+					currIrItem.setV5(String.valueOf(sensor.getV5()) + " ℃");
+					currIrItem.setV6(String.valueOf(sensor.getV6()) + " ");
+					currIrItem.setV7(String.valueOf(sensor.getV7()) + " ");
+					currIrItem.setV8(String.valueOf(sensor.getV8()) + " ");
+					currIrItem.setV9(String.valueOf(sensor.getV9()) + " ");
+					currIrItem.setAddTime(paramers.datetimeformate.format(sensor.getAddtime().getTime()));
+					arrIrList.add(currIrItem);
+				}
+			}
+			
+		}
+		return arrIrList;
+	}
+
+	public ArrayList<CurrIrItem> CreateCurrIrData(int dtuId) {
+		arrIrList = new ArrayList<>();
+		CurrIrItem currIrItem;
+		Map.Entry<DTU, Sensor> e = messageQueue.getById(dtuId);
+		if (e == null) {
+			return null;
+		}
+		Sensor sensor = e.getValue();
+		DTU dtu = e.getKey();
+		currIrItem = new CurrIrItem();
+		currIrItem.setId(sensor.getLmu().getId());
+		currIrItem.setName(dtu.getName() + "-" + sensor.getLmu().getName());
+		currIrItem.setV0(String.valueOf(sensor.getV0()) + " ppm");
+		currIrItem.setV1(String.valueOf(sensor.getV1()) + " %");
+		currIrItem.setV2(String.valueOf(sensor.getV2()) + " ℃");
+		currIrItem.setV3(String.valueOf(sensor.getV3()) + " ppm");
+		currIrItem.setV4(String.valueOf(sensor.getV4()) + " ppm");
+		currIrItem.setV5(String.valueOf(sensor.getV5()) + " ppm");
+		currIrItem.setV6(String.valueOf(sensor.getV6()) + " ppm");
+		currIrItem.setV7(String.valueOf(sensor.getV7()) + " ppm");
+		currIrItem.setV8(String.valueOf(sensor.getV8()) + " ppm");
+		currIrItem.setV9(String.valueOf(sensor.getV9()) + " ppm");
+		currIrItem.setAddTime(paramers.datetimeformate.format(sensor.getAddtime().getTime()));
+		arrIrList.add(currIrItem);
+		return arrIrList;
+	}
+
+	private ArrayList<CurrHrItem> arrHrList;
+
+	public ArrayList<CurrHrItem> CreateCurrHrData(Integer[] dtuIds) {
+		arrHrList = new ArrayList<>();
+		CurrHrItem currHrItem;
+		List<HisHrData> hisHrDataList = hisHrDataService.hisHrDataList(dtuIds);
+		List<LMU> lmuList = lmuService.LMUlistbyDtuId(dtuIds);
+		for (LMU lmu : lmuList) {
+			currHrItem = new CurrHrItem();
+			currHrItem.setId(lmu.getId());
+			currHrItem.setName(lmu.getDtu().getName() + "-" + lmu.getName());
+			for (HisHrData hisHrData : hisHrDataList) {
+				if (lmu.getId() == hisHrData.getLmuId()) {
+					currHrItem.setHr0(hisHrData.getHr0());
+					currHrItem.setHr4(hisHrData.getHr4());
+					currHrItem.setHr5(hisHrData.getHr5());
+					currHrItem.setHr6(hisHrData.getHr6());
+					currHrItem.setHr7(hisHrData.getHr7());
+					currHrItem.setHr8(hisHrData.getHr8());
+					currHrItem.setHr9(hisHrData.getHr9());
+					currHrItem.setHr10(hisHrData.getHr10());
+					currHrItem.setHr11(hisHrData.getHr11());
+					currHrItem.setHr12(hisHrData.getHr12());
+					currHrItem.setHr13(hisHrData.getHr13());
+					currHrItem.setHr14(hisHrData.getHr14());
+					currHrItem.setHr15(hisHrData.getHr15());
+					currHrItem.setHr16(hisHrData.getHr16());
+					currHrItem.setHr17(hisHrData.getHr17());
+					currHrItem.setHr18(hisHrData.getHr18());
+					currHrItem.setHr19(hisHrData.getHr19());
+					currHrItem.setHr20(hisHrData.getHr20());
+					currHrItem.setAddTime(paramers.datetimeformate.format(hisHrData.getAddtime().getTime()));
+					break;
+				}
+			}
+			arrHrList.add(currHrItem);
+		}
+		return arrHrList;
+	}
+}

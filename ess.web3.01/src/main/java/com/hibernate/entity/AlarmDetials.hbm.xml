@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="AlarmDetials" table="alarmdetials">
+	<id name="id" column="Id"/>
+	<property name="alarmId" column="AlarmId" length="50"/>
+	<property name="hisirdataId" column="HisirdataId" length="50"/>
+	<property name="addtime" column="Addtime" type="calendar" />
+	<property name="information" column="Information" length="1000" />
+	</class>
+</hibernate-mapping>

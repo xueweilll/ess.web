@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<!--<class name="CurrentIrData" table="currentirdataView">-->
+	<class name="CurrentIrData" table="currentirdata">
+		<id name="id" length="50"/>
+		<property name="dtuId" length="11"/>
+		<property name="lmuId" length="11"/>
+		<property name="addtime" type="calendar" />
+		<property name="Ir0" length="100" />
+		<property name="Ir1" length="100" />
+		<property name="Ir2" length="100" />
+		<property name="Ir3" length="100" />
+		<property name="Ir4" length="100" />
+		<property name="Ir5" length="100" />
+		<property name="Ir6" length="100" />
+		<property name="Ir7" length="100" />
+		<property name="Ir8" length="100" />
+		<property name="Ir9" length="100" />
+		<property name="Ir10" length="100" />
+		<property name="Ir11" length="100" />
+	</class>
+	<sql-query name="CurrIrData" callable="true">
+
+			<return alias="currentirdata" class="CurrentIrData">
+
+			</return>
+
+			{call CurrIrData()}
+
+	</sql-query>
+</hibernate-mapping>

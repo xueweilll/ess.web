@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="monitor" namespace="/" extends="json-default">
+		<!-- new -->
+		<action name="modelData" class="com.action.monitor.ModelAction" method="ModelData">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="modelEdit" class="com.action.monitor.ModelAction" method="ModelEdit">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="modelApply" class="com.action.monitor.AllmtAction" method="ModelApply">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="reflush" class="com.action.monitor.AllmtAction" method="Reflush">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="currentPoliceDate" class="com.action.monitor.PoliceAction" method="currentPoliceDate">
+			<result type="json"/>
+			<param name="excludeNullProperties">
+				true
+				</param>
+		</action>
+			<action name="cancleAlarm" class="com.action.monitor.PoliceAppAction" method="cancleAlarm">
+			<result type="json"/>
+			<param name="excludeNullProperties">
+				true
+				</param>
+		</action>
+	</package>
+</struts>

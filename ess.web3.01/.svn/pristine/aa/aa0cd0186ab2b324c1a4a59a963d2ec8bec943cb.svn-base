@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="index" namespace="/" extends="json-default">
+		<!-- new -->
+		<action name="menuTree" class="com.action.IndexAction" method="MenuTree">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="stationTree" class="com.action.IndexAction" method="StationTree">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="createDtus" class="com.action.IndexAction" method="CreateDtus">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="createLmusInfo" class="com.action.IndexAction" method="CreateLmusInfo">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="mapMarkers" class="com.action.IndexAction" method="MapMarkers">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="currentIrStore" class="com.action.IndexAction" method="CurrentIrStore">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="currentIrStoreByDtus" class="com.action.IndexAction" method="CurrentIrStoreByDtus">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="currentHrStoreByDtus" class="com.action.IndexAction" method="CurrentHrStoreByDtus">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+		<action name="getMAC" class="com.action.asyn.LimitAsyn" method="GetMAC">
+			<result type="json">
+			<param name="excludeNullProperties">
+				true
+			</param>
+			</result>
+		</action>
+	</package>
+</struts>

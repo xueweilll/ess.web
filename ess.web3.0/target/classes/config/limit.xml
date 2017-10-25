@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="limit" namespace="/" extends="json-default">
+		<!-- new -->
+		<action name="listRole" class="com.action.limit.LimitAction" method="ListRole">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+			</result>
+		</action>
+		<action name="listUser" class="com.action.limit.UserAction" method="ListUser">
+			<result type="json"/>
+		</action>
+		<action name="roles" class="com.action.limit.LimitAction" method="Roles">
+			<result type="json"/>
+		</action>
+		<!-- 
+			<action name="updateUser" class="com.action.limit.UserAction" method="updateUser">
+				<result type="json"/>
+			</action>
+			<action name="saveUser" class="com.action.limit.UserAction" method="saveUser">
+				<result type="json"/>
+			</action> -->
+		<action name="editUser" class="com.action.limit.UserAction" method="editUser">
+			<result type="json"/>
+		</action>
+		<action name="delUser" class="com.action.limit.UserAction" method="delUser">
+			<result type="json"/>
+		</action>
+		<action name="editRole" class="com.action.limit.LimitAction" method="editRole">
+			<result type="json"/>
+		</action>
+		<action name="delRole" class="com.action.limit.LimitAction" method="delRole">
+			<result type="json"/>
+		</action>
+		<action name="listMenu" class="com.action.limit.LimitAction" method="listMenu">
+			<result type="json"/>
+		</action>
+		<action name="limitList" class="com.action.limit.LimitAction" method="limitList">
+			<result type="json">
+				<param name="excludeNullProperties">
+				true
+				</param>
+				<param name="excludeProperties">
+					rmlinkList
+				</param>
+			</result>
+		</action>
+		<action name="newLimit" class="com.action.limit.LimitAction" method="newLimit">
+			<result type="json"/>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,113 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>site</title>
+<link href="css/style.css" rel="stylesheet" rev="stylesheet"
+	type="text/css" />
+<link href="extjs/resources/css/ext-all.css" rel="stylesheet"
+	rev="stylesheet" type="text/css" />
+	<script type="text/javascript" src="extjs/ext-all.js"></script>
+	<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="js/model/station.js"></script>
+	<script type="text/javascript" src="js/model/dtu.js"></script>	
+	<script type="text/javascript" src="js/model/lmu.js"></script>
+	<script type="text/javascript" src="js/system/lmugrid.js"></script>	
+<script type="text/javascript" src="js/system/dtu.js"></script>	
+
+</head>
+<body>
+<script language="javascript" type="text/javascript">
+/*
+var JPos = {};
+(function($){
+	$.$getAbsPos = function(p){
+		var _x = 0;
+		var _y = 0;
+		while(p.offsetParent){
+				_x += p.offsetLeft;
+				_y += p.offsetTop;
+				p = p.offsetParent;
+		}
+		
+		_x += p.offsetLeft;
+		_y += p.offsetTop;
+		
+		return {x:_x,y:_y};
+	};
+	
+	$.$getMousePos = function(evt){
+		var _x,_y;
+		evt = evt || window.event;
+		if(evt.pageX || evt.pageY){
+			_x = evt.pageX;
+			_y = evt.pageY;
+		}else if(evt.clientX || evt.clientY){
+			_x = evt.clientX + document.body.scrollLeft - document.body.clientLeft;
+			_y = evt.clientY + document.body.scrollTop - document.body.clientTop;
+		}else{
+			return $.$getAbsPos(evt.target);	
+		}
+		return {x:_x,y:_y};
+	}
+})(JPos);
+*/
+function getMousePos(event) { 
+      var e = event || window.event; 
+      var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft; 
+      var scrollY = document.documentElement.scrollTop || document.body.scrollTop; 
+      var x = e.pageX || e.clientX + scrollX; 
+      var y = e.pageY || e.clientY + scrollY; 
+      //alert('x: ' + x + '\ny: ' + y); 
+      return { 'x': x, 'y': y }; 
+}
+
+function getAbsPos(p){
+	var _x = 0;
+		var _y = 0;
+		while(p.offsetParent){
+				_x += p.offsetLeft;
+				_y += p.offsetTop;
+				p = p.offsetParent;
+		}
+		
+		_x += p.offsetLeft;
+		_y += p.offsetTop;
+		
+		return {x:_x,y:_y};
+}
+function vControl(e){
+	var mPos = getMousePos(e);
+	//console.info(arguments[1]);
+	var iPos = getAbsPos(arguments[1]);
+	
+	var x = mPos.x-iPos.x;
+	var y = mPos.y-iPos.y;
+	
+	var aax=$("#aa").width();
+	var aay=$("#aa").height();
+	
+	Ext.getCmp('dtuX').setValue((x/aax*1000).toFixed(2));
+	Ext.getCmp('dtuY').setValue((y/aay*1000).toFixed(2));
+	
+	var marker = "<div style='width: 20px;height: 20px;position:absolute;left: "+x+"px;top:"+y+"px' ><img src='image/marker.png' style='width: 20px;height: 20px;'/></div>";
+	
+	//var bgimg= "<img src='image/dapmap.png' style='width:100%;height:100%;'>";
+	$("#bb").empty();
+	$("#bb").append(marker);
+}
+function position(dtux,dtuy){
+	var aax=$("#aa").width();
+	var aay=$("#aa").height();
+	var x = dtux/1000*aax;
+	var y = dtuy/1000*aay;
+	var marker = "<div style='width: 20px;height: 20px;position:absolute;left: "+x+"px;top:"+y+"px' ><img src='image/marker.png' style='width: 20px;height: 20px;'/></div>";
+	var bgimg= "<img src='image/dap.jpg' style='width:100%;height:100%;'>";
+	$("#bb").empty();
+	$("#bb").append(marker);
+}
+</script>
+</body>
+</html>

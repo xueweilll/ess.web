@@ -1,0 +1,78 @@
+package com.protocol;
+
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.mina.core.session.IoSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hibernate.entity.DTU;
+import com.hibernate.entity.LMU;
+import com.hibernate.entity.Sensor;
+import com.service.SensorService;
+import com.unit.PartsQuence;
+@Service("wSProtocol")
+public class WSProtocol implements YZCProtocol{
+	@Autowired
+	private PartsQuence partsQuence;
+	@Autowired
+	private SensorService sensorService;
+	
+	@Override
+	public byte[] readCmd(int code) {
+		byte[] cmd = new byte[8];
+		cmd[0] = (byte) code;
+		cmd[1] = 0x03;
+		cmd[2] = 0x00;
+		cmd[3] = 0x00;
+		cmd[4] = 0x00;
+		cmd[5] = 0x02;
+		CRC crc = new CRC();
+		crc.CrcMake(6, cmd);
+		cmd[6] = crc.getBYCRCHi();
+		cmd[7] = crc.getBYCRCLo();
+		return cmd;
+	}
+
+	@Override
+	public void anlysis(byte[] data,IoSession session) {
+		CRC crc = new CRC();
+		if(crc.crc_check(7, data) != 0){
+			Map<String, String> map = new HashMap<>();
+			int wd = 0;
+			int sd = 0;
+			//data[3],data[4];
+			wd = Convert.ArrByteToInt(data,3,2);
+			sd = Convert.ArrByteToInt(data,5,2);
+			DTU dtu = (DTU) session.getAttribute("dtu");
+			Sensor sensor = new Sensor();
+			sensor.setId(UUID.randomUUID().toString());
+			sensor.setDtuId(String.valueOf(dtu.getId()));
+			for (LMU lmu : dtu.getLmus()) {
+				if (lmu.getCode() == data[0]) {
+					sensor.setLmu(lmu);
+					break;
+				}
+			}
+			sensor.setDtuName(dtu.getName());
+			//温度
+			sensor.setV2(new BigDecimal(String.valueOf(wd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP));
+			map.put("wd", String.valueOf(new BigDecimal(String.valueOf(wd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP)));
+			//湿度
+			sensor.setV3(new BigDecimal(String.valueOf(sd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP));
+			map.put("sd", String.valueOf(new BigDecimal(String.valueOf(sd)).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP)));
+			sensor.setAddtime(Calendar.getInstance());
+			try {
+				sensorService.insert(sensor);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			partsQuence.put(sensor.getLmu().getId(),map);
+		}
+	}
+
+}

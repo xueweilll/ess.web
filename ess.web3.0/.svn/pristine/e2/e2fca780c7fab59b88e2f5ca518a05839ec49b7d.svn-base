@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="DTU" table="dtu">
+		<id name="id" type="java.lang.Integer">
+			<column name ="Id"/>
+			<generator class="native"/>
+		</id>
+		<property name="code" column="Code" length="10" ></property>
+		<property name="name" column="Name" length="100"/>
+		<property name="address" column="Address" length="200"/>
+		<property name="IP" column="IP" length="50" />
+		<property name="Port" column="Port" />
+		<property name="stationId" column="stationId" />
+		<property name="isActive" column="IsActive" />
+		<property name="dtuX" column="dtuX" />
+		<property name="dtuY" column="dtuY" />
+		<property name="level" column="level" />
+		<property name="isAlarm" column="IsAlarm" />
+		<property name="isTogether" column="IsTogether" />
+		<property name="eqNum" column="EqNum" />
+		<property name="phone" column="Phone" />
+		<property name="nvrUsername" column="NvrUsername" />
+		<property name="nvrPassword" column="NvrPassword" />
+		<property name="nvrPort" column="NvrPort" />
+		<property name="nvrIp" column="NvrIp" />
+		<property name="nvrPath" column="NvrPath" />
+		<property name="nvrPhonePort" column="NvrPhonePort" />
+		
+		<!-- one-to-many配置 -->
+		<set name="lmus" inverse="true" cascade="all" lazy="false">
+			<key>
+				<column name="DtuId"></column>
+			</key>
+			<one-to-many class="com.hibernate.entity.LMU"/>
+		</set>
+	</class>
+</hibernate-mapping>

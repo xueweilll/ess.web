@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Model" table="model">
+	<id name="Id" />
+	<property name="ModelName" length="100"/>
+	<property name="PreTime" length="11"/>
+	<property name="Speed" length="11"/>
+	<property name="T1" length="50"/>
+	<property name="V1" length="50"/>
+	<property name="T2" length="50"/>
+	<property name="V2" length="50"/>
+	<property name="T3" length="50"/>
+	<property name="V3" length="50"/>
+	<property name="T4" length="50"/>
+	<property name="V4" length="50"/>
+	<property name="T5" length="50"/>
+	<property name="V5" length="50"/>
+	<property name="T6" length="50"/>
+	<property name="V6" length="50"/>
+	<property name="T7" length="50"/>
+	<property name="V7" length="50"/>
+	<property name="T8" length="50"/>
+	<property name="V8" length="50"/>
+	<!-- one-to-many配置
+	<set name="lmus" inverse="true" cascade="all" lazy="true">
+		<key>
+			<column name="DtuId"></column>
+		</key>
+		<one-to-many class="com.hibernate.entity.LMU"/>
+	</set> -->
+	</class>
+</hibernate-mapping>

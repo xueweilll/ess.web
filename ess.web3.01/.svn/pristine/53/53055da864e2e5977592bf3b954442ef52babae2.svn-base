@@ -1,0 +1,80 @@
+package com.hibernate.entity;
+
+import java.util.Calendar;
+
+public class AlarmMsg {
+	private int Id;
+	private String DtuId;
+	private int LmuId;
+	private Calendar Addtime;
+	private String Infomation;
+	private boolean Confirm;
+
+	public boolean isConfirm() {
+		return Confirm;
+	}
+
+	public void setConfirm(boolean confirm) {
+		Confirm = confirm;
+	}
+
+	private DTU dtu;
+	private LMU lmu;
+
+	public DTU getDtu() {
+		return dtu;
+	}
+
+	public void setDtu(DTU dtu) {
+		this.dtu = dtu;
+	}
+
+	public LMU getLmu() {
+		return lmu;
+	}
+
+	public void setLmu(LMU lmu) {
+		this.lmu = lmu;
+	}
+
+	public int getId() {
+		return Id;
+	}
+
+	public void setId(int id) {
+		Id = id;
+	}
+
+	public String getDtuId() {
+		return DtuId;
+	}
+
+	public void setDtuId(String dtuId) {
+		DtuId = dtuId;
+	}
+
+	public int getLmuId() {
+		return LmuId;
+	}
+
+	public void setLmuId(int lmuId) {
+		LmuId = lmuId;
+	}
+
+	public Calendar getAddtime() {
+		return Addtime;
+	}
+
+	public void setAddtime(Calendar addtime) {
+		Addtime = addtime;
+	}
+
+	public String getInfomation() {
+		return Infomation;
+	}
+
+	public void setInfomation(String infomation) {
+		Infomation = infomation;
+	}
+
+}

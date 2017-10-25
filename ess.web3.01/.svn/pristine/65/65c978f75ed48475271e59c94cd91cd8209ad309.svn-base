@@ -1,0 +1,38 @@
+package com.unit;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+@Scope("singleton")
+@Service("lmuMsgQuence")
+public class LmuMsgQuence {
+	private ConcurrentHashMap<Integer, Map<String, Object>> lmuMsgMap;
+	
+	@PostConstruct
+	public void init(){
+		lmuMsgMap = new ConcurrentHashMap<>();
+	}
+	public void put(Integer key,Map<String, Object> map){
+		lmuMsgMap.put(key, map);
+	}
+	
+	public void remove(String key){
+		if (lmuMsgMap.containsKey(key)) {
+			lmuMsgMap.remove(key);
+		}
+	}
+	
+	public Map<String, Object> get(String key){
+		return lmuMsgMap.get(key);
+	}
+	
+	public ConcurrentHashMap<Integer, Map<String, Object>> getPartsData() {
+		return lmuMsgMap;
+	}
+	
+}

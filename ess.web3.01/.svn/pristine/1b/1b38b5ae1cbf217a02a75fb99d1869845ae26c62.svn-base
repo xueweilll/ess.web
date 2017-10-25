@@ -1,0 +1,28 @@
+package com.listener;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import com.socket.MinaServer;
+
+public class MinaServerLinstener implements ServletContextListener {
+
+	@Override
+	public void contextDestroyed(ServletContextEvent arg0) {
+		minaServer.close();
+	}
+
+	private MinaServer minaServer;
+	
+	@Override
+	public void contextInitialized(ServletContextEvent arg0) {
+		try {
+			minaServer = MinaServer.instance();
+			minaServer.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Sensor" table="sensor">
+	<id name="id" column="Id" length="50"/>
+	<property name="dtuId" length="100"/>
+	<property name="dtuName" column="dtuName"/>
+	<property name="v0" column="V0"/>
+	<property name="v1" column="V1"/>
+	<property name="v2" column="V2"/>
+	<property name="v3" column="V3"/>
+	<property name="v4" column="V4"/>
+	<property name="v5" column="V5"/>
+	<property name="v6" column="V6"/>
+	<property name="v7" column="V7"/>
+	<property name="v8" column="V8"/>
+	<property name="v9" column="V9"/>
+	<property name="v10" column="V10"/>
+	<property name="v11" column="V11"/>
+	<property name="addtime" type="calendar" />
+	<!-- many-to-one -->
+	<many-to-one name="lmu" column="LmuId" class="com.hibernate.entity.LMU" lazy="false" fetch="join" insert="true" update="true"/>
+	</class>
+</hibernate-mapping>

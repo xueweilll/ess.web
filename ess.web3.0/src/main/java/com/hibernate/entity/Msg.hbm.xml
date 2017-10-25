@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Msg" table="msg">
+	<id name="id" />
+	<property name="lmuId"/>
+	<property name="data" length="100"/>
+	<property name="entryDate" type="calendar" />
+	<property name="type" type="boolean"/>
+	<property name="mode" type="boolean"/>
+	<property name="dtuId" length="100"/>
+	<property name="pos"/>
+	</class>
+</hibernate-mapping>

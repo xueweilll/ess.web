@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.hibernate.entity">
+	<class name="Params" table="params">
+	<id name="id" />
+	<property name="Name" length="100"/>
+	<property name="Value" length="8000"/>
+	<property name="DefaultValue" length="8000"/>
+	</class>
+</hibernate-mapping>

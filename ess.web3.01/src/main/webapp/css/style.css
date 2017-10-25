@@ -1,0 +1,59 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	margin: 0 0 0 0;
+}
+
+p {
+	margin-left: 5px;
+}
+.menu{
+	height:27px;
+	line-height:27px;
+	background: url(../image/menubg.png) repeat-x;
+}
+
+.menu0 {
+	background: url(../image/menu0.png) no-repeat;
+}
+.map{
+	background: url(../image/map.png) no-repeat;
+}
+.menu1 {
+	background: url(../image/menu1.png) no-repeat;
+}
+
+.menu2 {
+	background: url(../image/menu2.png) no-repeat;
+}
+
+.menu3 {
+	background: url(../image/menu3.png) no-repeat;
+} 
+
+.menu4 {
+	background: url(../image/menu4.png) no-repeat;
+}
+
+.menu5 {
+	background: url(../image/menu5.png) no-repeat;
+}
+
+.nav {
+	background-image: url(extjs/examples/shared/icons/fam/folder_go.png);
+}
+
+.info {
+	background-image: url(extjs/examples/shared/icons/fam/information.png);
+}
+
+a:link, a:visited{
+	color:#484848;
+	font-size:12px;
+	text-decoration:none;
+}
+
+a:hover, a:focus{
+	color:#3671a5;
+}

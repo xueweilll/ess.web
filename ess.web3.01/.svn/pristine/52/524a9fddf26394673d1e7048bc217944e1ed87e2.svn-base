@@ -1,0 +1,13 @@
+# Set The RootLogger
+log4j.rootLogger=warn, console
+# Direct Log Messages To Console
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.Target=System.out
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %c:%L - %m%n
+# Log Hibernate
+log4j.logger.org.hibernate=error
+# Log Just The SQL
+log4j.logger.org.hibernate.SQL=debug
+# Log Schema Export Update
+log4j.logger.org.hibernate.tool.hbm2ddl=debug
